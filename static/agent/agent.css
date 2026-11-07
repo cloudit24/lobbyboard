@@ -20,3 +20,7 @@
 .agent-table th, .agent-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--fd-line); vertical-align: middle; }
 .agent-table form { margin: 0; }
 .agent-page button.fd-btn { cursor: pointer; font-family: inherit; }
+
+/* Announcement block: first and largest on the TV control page */
+.agent-notice-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; align-items: end; margin-top: 12px; }
+.agent-notice-form label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }

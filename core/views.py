@@ -102,8 +102,17 @@ def screen_state(request, slug):
         "musicOn": st.music_on, "music": _media(st.music_items()) if st.music_on else [],
         "shuffle": st.music_shuffle, "volume": st.volume,
         "command": st.command, "commandSeq": st.command_seq,
-        "occasion": _occasion(scr),
+        "occasion": _occasion(scr), "notice": _notice(st),
     })
+
+
+def _notice(st):
+    """Reception's announcement, or None when it is off or its time is up."""
+    if not st.notice_on or (st.notice_until and st.notice_until <= timezone.now()):
+        return None
+    bg = st.notice_bg
+    return {"text": st.notice_text, "sub": st.notice_sub, "anim": st.notice_anim, "color": st.notice_color,
+            "bg": bg.file.url if bg else "", "bgKind": bg.kind if bg else ""}
 
 
 def _occasion(scr):

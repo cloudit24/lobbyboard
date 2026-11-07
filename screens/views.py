@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import os
 
 from django.conf import settings
@@ -80,6 +82,8 @@ def screen(request, slug):
         current_video=current(st.video_item, st.video_playlist),
         current_music=current(st.music_item, st.music_playlist),
         youtube=bool(DisplaySettings.load().youtube_id),
+        notice_bgs=MediaItem.objects.filter(status="approved", kind__in=["image", "video"]),
+        notice_anims=st.NOTICE_ANIMS,
         screens=Screen.for_agent(request.user),
         occasions=[(o, o.running()) for o in Occasion.objects.filter(is_active=True).filter(
             Q(screens=scr) | Q(screens__isnull=True)).distinct()],
@@ -144,6 +148,27 @@ def _apply(action, data, st):
         occ.is_on, occ.stopped_at = False, timezone.now()
         occ.save()
         return f"Stopped the occasion: {occ.name}"
+    if action == "notice_on":
+        text = (data.get("notice_text") or "").strip()[:200]
+        if not text:
+            return None
+        st.notice_on, st.notice_text = True, text
+        st.notice_sub = (data.get("notice_sub") or "").strip()[:300]
+        st.notice_anim = data.get("notice_anim") if data.get("notice_anim") in dict(st.NOTICE_ANIMS) else "rise"
+        color = data.get("notice_color") or ""
+        st.notice_color = color if len(color) == 7 and color.startswith("#") else "#0b2233"
+        bg = data.get("notice_bg") or ""
+        st.notice_bg = MediaItem.objects.filter(pk=bg, status="approved", kind__in=["image", "video"]).first() \
+            if bg.isdigit() else None
+        try:
+            minutes = int(data.get("notice_minutes") or 0)
+        except ValueError:
+            minutes = 0
+        st.notice_until = timezone.now() + timedelta(minutes=minutes) if minutes > 0 else None
+        return f"Announcement on: {text}" + (f" (for {minutes} min)" if minutes > 0 else "")
+    if action == "notice_off":
+        st.notice_on = False
+        return "Announcement off"
     if action == "reload":
         st.command, st.command_seq = "reload", st.command_seq + 1
         return "Screen reloaded"

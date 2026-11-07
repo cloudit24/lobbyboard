@@ -88,6 +88,16 @@ class ScreenState(models.Model):
     command = models.CharField(max_length=20, blank=True)
     command_seq = models.PositiveIntegerField(default=0)
     version = models.PositiveIntegerField(default=0)
+    # Announcement from reception ("On a short break"): covers the whole screen until switched off.
+    NOTICE_ANIMS = [("rise", "Rise in"), ("fade", "Fade"), ("pulse", "Gentle pulse"), ("zoom", "Zoom"),
+                    ("slide", "Slide across"), ("none", "No movement")]
+    notice_on = models.BooleanField(default=False)
+    notice_text = models.CharField(max_length=200, blank=True)
+    notice_sub = models.CharField(max_length=300, blank=True)
+    notice_anim = models.CharField(max_length=10, choices=NOTICE_ANIMS, default="rise")
+    notice_color = models.CharField(max_length=7, default="#0b2233")
+    notice_bg = models.ForeignKey(MediaItem, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    notice_until = models.DateTimeField(null=True, blank=True)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
                                    related_name="+")
     updated_at = models.DateTimeField(auto_now=True)

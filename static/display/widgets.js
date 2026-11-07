@@ -63,6 +63,29 @@
     }).catch(function () { /* keep the last good reading */ });
   }
 
+  /* Reception's announcement: full screen, its own colour or picture/video, with a chosen movement. */
+  var noticeSig = '';
+  window.applyNotice = function (n) {
+    var box = document.getElementById('notice'), sig = JSON.stringify(n || null);
+    if (!box || sig === noticeSig) return;
+    noticeSig = sig;
+    if (!n) { box.className = 'notice'; return; }
+    box.style.background = n.color;
+    var bg = document.getElementById('notice-bg');
+    bg.innerHTML = '';
+    if (n.bg) {
+      var m = document.createElement(n.bgKind === 'video' ? 'video' : 'img');
+      m.src = n.bg;
+      if (n.bgKind === 'video') { m.muted = true; m.loop = true; m.autoplay = true; m.setAttribute('playsinline', ''); }
+      bg.appendChild(m);
+    }
+    document.getElementById('notice-text').textContent = n.text;
+    document.getElementById('notice-sub').textContent = n.sub || '';
+    box.className = 'notice';
+    void box.offsetWidth;                       // restart the animation
+    box.className = 'notice on anim-' + n.anim;
+  };
+
   clocks(); setInterval(clocks, 1000);
   slideshows();
   weather(); setInterval(weather, 15 * 60 * 1000);

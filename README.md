@@ -188,3 +188,15 @@ MIT - see [LICENSE](LICENSE).
 
 ### Arabic headlines (picker under the prayer times)
 Add an RSS feed in Admin → News feeds with **Language: Arabic** (e.g. the WAM Arabic RSS link). Arabic feeds show only in the iPhone-style picker; English feeds stay in the news list. The panel hides itself when no Arabic feed has items.
+
+## Design each TV
+Admin → Screens → a TV → **Design this TV**. Drag widgets onto a 24 x 12 grid, resize them, click one to
+change its settings (text, colours, box look, file, speed...). Widgets: logo, clocks, prayer times, headlines,
+video/slideshow, about us, picture, video loop, photo slideshow, text, countdown, QR code, scrolling
+announcements, weather, web page. Pick a background photo or video and how dark it is. Tick
+**Use this on every TV** to give all TVs the same design, or copy one TV's design to another.
+
+## Announcements from reception
+The TV control page starts with **Announcement on the whole screen**: one tap for "On a break",
+"Back in 15 minutes", "Prayer" or "Closed", or your own text, with a movement, a colour or a picture/video
+behind it, and an optional time after which it goes away by itself.

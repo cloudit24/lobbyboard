@@ -63,3 +63,19 @@ class LayoutDesignerTests(TestCase):
         self.client.post(self.url, {"action": "reset"})
         self.scr.refresh_from_db()
         self.assertEqual(self.scr.layout, [])
+
+
+class AnnouncementTests(TestCase):
+    def test_reception_turns_announcement_on_and_off(self):
+        admin = get_user_model().objects.create_superuser("notice-admin", "n@example.com", "x-test-only-1")
+        scr = Screen.objects.create(name="Lobby", slug="lobby")
+        self.client.force_login(admin)
+        url = reverse("agent:screen", args=["lobby"])
+        state = reverse("screen_state", args=["lobby"])
+        self.client.post(url, {"action": "notice_on", "notice_text": "On a short break", "notice_anim": "zoom",
+                               "notice_color": "#123456", "notice_minutes": "10"})
+        n = self.client.post(state).json()["notice"]
+        self.assertEqual((n["text"], n["anim"], n["color"]), ("On a short break", "zoom", "#123456"))
+        self.client.post(url, {"action": "notice_off"})
+        self.assertIsNone(self.client.post(state).json()["notice"])
+        scr.refresh_from_db()

@@ -1007,3 +1007,22 @@ body[data-occasion=national] .occ-greet b { background-image: linear-gradient(10
 .bg-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .bg-dim { position: absolute; inset: 0; background: #000; }
 .bg.has-media .blob, .bg.has-media .grid-floor { display: none; }
+
+/* ===== Reception's announcement ===== */
+.notice { position: fixed; inset: 0; z-index: 90; display: none; place-items: center; text-align: center; overflow: hidden; }
+.notice.on { display: grid; animation: notice-fade .8s ease both; }
+.notice-bg { position: absolute; inset: 0; }
+.notice-bg img, .notice-bg video { width: 100%; height: 100%; object-fit: cover; }
+.notice-bg:not(:empty)::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.45); }
+.notice-in { position: relative; padding: 40px 80px; max-width: 80%; }
+.notice-text { font-size: 110px; font-weight: 700; color: #fff; line-height: 1.1; text-shadow: 0 6px 30px rgba(0,0,0,.4); }
+.notice-sub { font-size: 44px; color: rgba(255,255,255,.85); margin-top: 24px; }
+.anim-rise .notice-in { animation: notice-rise 1s cubic-bezier(.22,1,.36,1) both; }
+.anim-zoom .notice-in { animation: notice-zoom 1s cubic-bezier(.22,1,.36,1) both; }
+.anim-pulse .notice-in { animation: notice-pulse 3s ease-in-out infinite; }
+.anim-slide .notice-text { animation: notice-slide 14s linear infinite; white-space: nowrap; }
+@keyframes notice-fade { from { opacity: 0; } }
+@keyframes notice-rise { from { opacity: 0; transform: translateY(60px); } }
+@keyframes notice-zoom { from { opacity: 0; transform: scale(.7); } }
+@keyframes notice-pulse { 50% { transform: scale(1.04); } }
+@keyframes notice-slide { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }

@@ -1023,6 +1023,7 @@ async function pollState() {
     if (sig !== occSig) { occSig = sig; startOccasion(s.occasion); }
     state = deriveState();
     if (changed) { applyCenter(); applyAudio(); }
+    if (window.applyNotice) applyNotice(s.notice);
     if (lastCommandSeq === null) lastCommandSeq = s.commandSeq;           // don't replay old commands on load
     else if (s.commandSeq !== lastCommandSeq) { lastCommandSeq = s.commandSeq; runCommand(s.command); }
   } catch (e) { /* server unreachable: keep playing what we have */ }
