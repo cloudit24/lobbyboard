@@ -24,3 +24,8 @@
 /* Announcement block: first and largest on the TV control page */
 .agent-notice-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; align-items: end; margin-top: 12px; }
 .agent-notice-form label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
+.agent-preset { display: inline-flex; align-items: center; gap: 2px; }
+.agent-preset form { display: inline; }
+.agent-preset-x { background: none; border: 0; font-size: 18px; cursor: pointer; color: var(--fd-muted, #888); padding: 0 6px; }
+.agent-save-preset { grid-column: 1 / -1; }
+.agent-save-preset[open] { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }

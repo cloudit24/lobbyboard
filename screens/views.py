@@ -16,7 +16,7 @@ from desk.access import needs
 from core.models import DisplaySettings
 from library.models import ALL_EXTENSIONS, MediaItem, Playlist, kind_for
 
-from .models import Occasion, Screen
+from .models import NoticePreset, Occasion, Screen
 
 
 def _ctx(request, **extra):
@@ -61,6 +61,7 @@ def screen(request, slug):
     if request.method == "POST":
         action = request.POST.get("action", "")
         before = st.describe()
+        st.updated_by = request.user
         msg = _apply(action, request.POST, st)
         if msg is None:
             messages.error(request, "Choose something to play first.")
@@ -83,7 +84,7 @@ def screen(request, slug):
         current_music=current(st.music_item, st.music_playlist),
         youtube=bool(DisplaySettings.load().youtube_id),
         notice_bgs=MediaItem.objects.filter(status="approved", kind__in=["image", "video"]),
-        notice_anims=st.NOTICE_ANIMS,
+        notice_anims=st.NOTICE_ANIMS, presets=NoticePreset.objects.all(),
         screens=Screen.for_agent(request.user),
         occasions=[(o, o.running()) for o in Occasion.objects.filter(is_active=True).filter(
             Q(screens=scr) | Q(screens__isnull=True)).distinct()],
@@ -166,6 +167,30 @@ def _apply(action, data, st):
             minutes = 0
         st.notice_until = timezone.now() + timedelta(minutes=minutes) if minutes > 0 else None
         return f"Announcement on: {text}" + (f" (for {minutes} min)" if minutes > 0 else "")
+    if action == "preset_save":
+        text = (data.get("notice_text") or "").strip()[:200]
+        if not text:
+            return None
+        bg = data.get("notice_bg") or ""
+        color = data.get("notice_color") or ""
+        try:
+            minutes = max(0, int(data.get("notice_minutes") or 0))
+        except ValueError:
+            minutes = 0
+        p = NoticePreset.objects.create(
+            label=(data.get("preset_label") or text).strip()[:40], text=text,
+            sub=(data.get("notice_sub") or "").strip()[:300],
+            anim=data.get("notice_anim") if data.get("notice_anim") in dict(st.NOTICE_ANIMS) else "rise",
+            color=color if len(color) == 7 and color.startswith("#") else "#0b2233",
+            bg=MediaItem.objects.filter(pk=bg, status="approved", kind__in=["image", "video"]).first() if bg.isdigit() else None,
+            minutes=minutes, created_by=st.updated_by)
+        return f"Saved the announcement button: {p.label}"
+    if action == "preset_delete":
+        p = NoticePreset.objects.filter(pk=data.get("preset") or 0).first()
+        if not p:
+            return None
+        p.delete()
+        return f"Removed the announcement button: {p.label}"
     if action == "notice_off":
         st.notice_on = False
         return "Announcement off"

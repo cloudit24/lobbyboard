@@ -9,7 +9,7 @@ from simple_history.admin import SimpleHistoryAdmin
 from core.models import bump_content_version
 
 from . import widgets
-from .models import AboutObjective, AboutProduct, AboutUs, AboutValue, Occasion, Screen
+from .models import AboutObjective, AboutProduct, AboutUs, AboutValue, NoticePreset, Occasion, Screen
 
 
 @admin.register(Screen)
@@ -158,3 +158,9 @@ class AboutUsAdmin(SimpleHistoryAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(NoticePreset)
+class NoticePresetAdmin(admin.ModelAdmin):
+    list_display = ("label", "text", "minutes", "created_by", "created_at")
+    search_fields = ("label", "text")

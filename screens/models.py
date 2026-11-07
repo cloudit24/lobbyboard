@@ -307,3 +307,25 @@ class AboutProduct(models.Model):
             return ""
         svg = self.icon_svg.replace("currentColor", colour)
         return "data:image/svg+xml;base64," + base64.b64encode(svg.encode()).decode()
+
+
+class NoticePreset(models.Model):
+    """A quick announcement button reception saved for later ("Lunch break", "Lift out of order")."""
+
+    label = models.CharField("Button name", max_length=40)
+    text = models.CharField(max_length=200)
+    sub = models.CharField(max_length=300, blank=True)
+    anim = models.CharField(max_length=10, choices=ScreenState.NOTICE_ANIMS, default="rise")
+    color = models.CharField(max_length=7, default="#0b2233")
+    bg = models.ForeignKey(MediaItem, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    minutes = models.PositiveSmallIntegerField(default=0, help_text="0 = stays until taken off.")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                   related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["label"]
+        verbose_name = "Announcement button"
+
+    def __str__(self):
+        return self.label

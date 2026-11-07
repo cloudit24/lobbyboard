@@ -79,3 +79,17 @@ class AnnouncementTests(TestCase):
         self.client.post(url, {"action": "notice_off"})
         self.assertIsNone(self.client.post(state).json()["notice"])
         scr.refresh_from_db()
+
+    def test_reception_saves_and_removes_own_button(self):
+        from .models import NoticePreset
+        admin = get_user_model().objects.create_superuser("preset-admin", "p@example.com", "x-test-only-1")
+        Screen.objects.create(name="Lobby", slug="lobby")
+        self.client.force_login(admin)
+        url = reverse("agent:screen", args=["lobby"])
+        self.client.post(url, {"action": ["notice_on", "preset_save"], "notice_text": "Lift out of order",
+                               "preset_label": "Lift", "notice_minutes": "30"})
+        p = NoticePreset.objects.get()
+        self.assertEqual((p.label, p.text, p.minutes, p.created_by), ("Lift", "Lift out of order", 30, admin))
+        self.assertContains(self.client.get(url), "⭐ Lift")
+        self.client.post(url, {"action": "preset_delete", "preset": p.pk})
+        self.assertFalse(NoticePreset.objects.exists())

@@ -33,24 +33,37 @@
       <button type="button" class="fd-btn" data-t="Back in 15 minutes" data-s="" data-m="15">⏱ Back in 15 min</button>
       <button type="button" class="fd-btn" data-t="Closed for prayer" data-s="مغلق للصلاة" data-m="20">🕌 Prayer</button>
       <button type="button" class="fd-btn" data-t="Closed" data-s="We open again tomorrow">🔒 Closed</button>
+      {% for p in presets %}<span class="agent-preset"><button type="button" class="fd-btn" data-t="{{ p.text }}" data-s="{{ p.sub }}"
+        data-m="{{ p.minutes }}" data-a="{{ p.anim }}" data-c="{{ p.color }}" data-b="{{ p.bg_id|default:'' }}">⭐ {{ p.label }}</button>
+        <form method="post" onsubmit="return confirm('Remove the button {{ p.label|escapejs }}?')">{% csrf_token %}
+          <input type="hidden" name="action" value="preset_delete"><input type="hidden" name="preset" value="{{ p.pk }}">
+          <button class="agent-preset-x" title="Remove this button" aria-label="Remove {{ p.label }}">×</button></form></span>{% endfor %}
     </div>
     <form method="post" class="agent-form agent-notice-form">{% csrf_token %}<input type="hidden" name="action" value="notice_on">
       <label>Big text <input type="text" name="notice_text" id="nt" maxlength="200" required value="{{ st.notice_text }}"></label>
       <label>Small line under it <input type="text" name="notice_sub" id="ns" maxlength="300" value="{{ st.notice_sub }}"></label>
-      <label>Movement <select name="notice_anim">{% for v, l in notice_anims %}<option value="{{ v }}"{% if v == st.notice_anim %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></label>
-      <label>Colour <input type="color" name="notice_color" value="{{ st.notice_color }}"></label>
-      <label>Or a picture / video behind it <select name="notice_bg"><option value="">Just the colour</option>
+      <label>Movement <select name="notice_anim" id="na">{% for v, l in notice_anims %}<option value="{{ v }}"{% if v == st.notice_anim %} selected{% endif %}>{{ l }}</option>{% endfor %}</select></label>
+      <label>Colour <input type="color" name="notice_color" id="nc" value="{{ st.notice_color }}"></label>
+      <label>Or a picture / video behind it <select name="notice_bg" id="nb"><option value="">Just the colour</option>
         {% for b in notice_bgs %}<option value="{{ b.pk }}"{% if b.pk == st.notice_bg_id %} selected{% endif %}>{{ b.get_kind_display }}: {{ b }}</option>{% endfor %}</select></label>
       <label>Take it off by itself after <select name="notice_minutes" id="nm"><option value="0">- when I take it off -</option>
         <option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option><option value="20">20 min</option>
         <option value="30">30 min</option><option value="60">1 hour</option></select></label>
       <button class="fd-btn fd-btn--primary">📢 Show it now</button>
+      <details class="agent-save-preset"><summary>⭐ Save as my own button</summary>
+        <label>Button name <input type="text" name="preset_label" maxlength="40" placeholder="e.g. Lunch break"></label>
+        <button class="fd-btn" name="action" value="preset_save">Save button</button>
+      </details>
     </form>
     <script>
       document.querySelectorAll('#notice-presets [data-t]').forEach(function (b) {
         b.onclick = function () {
           document.getElementById('nt').value = b.dataset.t; document.getElementById('ns').value = b.dataset.s || '';
-          document.getElementById('nm').value = b.dataset.m || '0'; document.getElementById('nt').focus();
+          document.getElementById('nm').value = b.dataset.m || '0';
+          if (b.dataset.a) document.getElementById('na').value = b.dataset.a;
+          if (b.dataset.c) document.getElementById('nc').value = b.dataset.c;
+          if (b.dataset.b !== undefined) document.getElementById('nb').value = b.dataset.b;
+          document.getElementById('nt').focus();
         };
       });
     </script>
