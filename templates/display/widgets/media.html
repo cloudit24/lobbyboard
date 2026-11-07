@@ -1,0 +1,24 @@
+{% load static %}
+<div class="card media-card" data-name="media">
+  <div class="video-wrap" id="video-wrap">
+    <div class="closed-ribbon" id="closed-ribbon"><i data-icon="calendar"></i><div><b id="closed-ar"></b><small id="closed-en"></small></div></div>
+    <div class="welcome-screen" id="welcome-screen">
+      <div class="w-photos" id="w-photos"></div>
+      <div class="orbit o1"><i></i></div><div class="orbit o2"><i></i></div><div class="orbit o3"><i></i></div>
+      <div class="core-glow"></div>
+      <div class="welcome-text">
+        <div class="w-greet" id="w-greet"></div>
+        <div class="w-ar shimmer">{{ config.welcomeAr }}</div>
+        <div class="w-en">{{ config.welcomeEn }}</div>
+        <div class="w-sub">{{ config.welcomeSub }}</div>
+      </div>
+    </div>
+    <div class="slideshow" id="slideshow"></div>
+    <video id="vid" playsinline preload="auto" class="hidden"></video>
+    <div class="yt-embed" id="yt-embed"><iframe id="yt-iframe" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
+    <canvas class="fx" id="fx"></canvas>
+    <div class="occ-greet" id="occ-greet"><b id="occ-greet-ar"></b><span id="occ-greet-en"></span></div>
+    <div class="prayer-now" id="prayer-now"><i data-icon="mosque"></i><div><b id="prayer-now-ar"></b><small id="prayer-now-en"></small></div></div>
+    <div class="now-music" id="now-music"><span class="eq"><i></i><i></i><i></i><i></i></span><span id="now-music-title"></span></div>
+  </div>
+</div>

@@ -1,0 +1,90 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/gridstack-14.0.0/gridstack.min.css' %}">
+<style>
+  .ld { display: grid; grid-template-columns: 240px 1fr; gap: 20px; align-items: start; }
+  .ld-side h3 { margin: 0 0 8px; }
+  .ld-palette button { display: block; width: 100%; margin: 0 0 6px; text-align: left; }
+  .ld-palette .none { color: var(--fd-muted, #888); font-size: 13px; }
+  .ld-canvas { position: relative; aspect-ratio: 16 / 9; background: #0b1d2b; border-radius: 10px; overflow: hidden; }
+  .grid-stack-item-content { background: #12324a; color: #fff; border: 1px solid #2cc4d6; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 600; padding: 6px; }
+  .grid-stack-item-content .x { position: absolute; top: 4px; right: 6px; background: none; border: 0; color: #fff;
+    font-size: 18px; cursor: pointer; line-height: 1; }
+  .ld-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+  .ld-help { color: var(--fd-muted, #888); margin: 0 0 12px; }
+  @media (max-width: 800px) { .ld { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> ›
+  <a href="{% url 'admin:screens_screen_changelist' %}">Screens</a> ›
+  <a href="{% url 'admin:screens_screen_change' screen.pk %}">{{ screen }}</a> › Layout</div>{% endblock %}
+{% block content %}
+<p class="ld-help">Drag a widget to move it, drag its corner to resize it, × to take it off. Add widgets from the list. Then <b>Save</b>.</p>
+<div class="ld">
+  <aside class="ld-side">
+    <h3>Add a widget</h3>
+    <div class="ld-palette" id="palette"></div>
+    <h3 style="margin-top:18px">Other</h3>
+    <a class="fd-btn" href="{% url 'screen' screen.slug %}" target="_blank" rel="noopener">Open the TV page</a>
+  </aside>
+  <div>
+    <div class="ld-canvas"><div class="grid-stack" id="grid"></div></div>
+    <div class="ld-actions">
+      <form method="post" id="save-form">{% csrf_token %}<input type="hidden" name="action" value="save">
+        <input type="hidden" name="layout" id="layout-input"><button class="button default" type="submit">Save</button></form>
+      <form method="post" id="reset-form">{% csrf_token %}
+        <input type="hidden" name="action" value="reset"><button class="button" type="submit">Standard layout</button></form>
+      {% if others %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="copy">
+        <select name="source">{% for o in others %}<option value="{{ o.pk }}">{{ o }}</option>{% endfor %}</select>
+        <button class="button" type="submit">Copy layout from this TV</button></form>{% endif %}
+    </div>
+  </div>
+</div>
+{{ layout|json_script:"ld-layout" }}{{ catalog|json_script:"ld-catalog" }}
+<script src="{% static 'vendor/gridstack-14.0.0/gridstack-all.js' %}"></script>
+<script>
+(function () {
+  const COLS = {{ cols }}, ROWS = {{ rows }};
+  const catalog = JSON.parse(document.getElementById('ld-catalog').textContent);
+  const start = JSON.parse(document.getElementById('ld-layout').textContent);
+  const canvas = document.querySelector('.ld-canvas');
+  const cell = () => Math.floor(canvas.clientHeight / ROWS);
+  const grid = GridStack.init({ column: COLS, maxRow: ROWS, cellHeight: cell(), margin: 4, float: true,
+                                columnOpts: { breakpoints: [] } }, '#grid');
+  function add(it) {
+    const c = catalog[it.t];
+    const el = grid.addWidget({ x: it.x, y: it.y, w: it.w, h: it.h, minW: c.minW, minH: c.minH, id: it.t });
+    const box = el.querySelector('.grid-stack-item-content');
+    box.textContent = c.label;
+    const x = document.createElement('button');
+    x.type = 'button'; x.className = 'x'; x.textContent = '×'; x.title = 'Remove'; x.setAttribute('aria-label', 'Remove ' + c.label);
+    x.onclick = () => { grid.removeWidget(el); palette(); };
+    box.appendChild(x);
+  }
+  const placed = () => grid.getGridItems().map(el => el.gridstackNode.id);
+  function palette() {
+    const free = Object.keys(catalog).filter(t => !placed().includes(t));
+    const box = document.getElementById('palette');
+    box.innerHTML = free.length ? '' : '<p class="none">Every widget is on the screen.</p>';
+    free.forEach(t => {
+      const c = catalog[t], b = document.createElement('button');
+      b.type = 'button'; b.className = 'button'; b.textContent = '+ ' + c.label;
+      b.onclick = () => {
+        if (!grid.willItFit({ w: c.minW, h: c.minH })) { alert('No free space. Make another widget smaller first.'); return; }
+        add({ t, w: c.minW, h: c.minH }); palette();
+      };
+      box.appendChild(b);
+    });
+  }
+  grid.batchUpdate(); start.forEach(add); grid.batchUpdate(false); palette();
+  window.addEventListener('resize', () => grid.cellHeight(cell()));
+  document.getElementById('reset-form').addEventListener('submit', e => { if (!confirm('Go back to the standard layout?')) e.preventDefault(); });
+  document.getElementById('save-form').addEventListener('submit', () => {
+    document.getElementById('layout-input').value = JSON.stringify(
+      grid.getGridItems().map(el => { const n = el.gridstackNode; return { t: n.id, x: n.x, y: n.y, w: n.w, h: n.h }; }));
+  });
+})();
+</script>
+{% endblock %}

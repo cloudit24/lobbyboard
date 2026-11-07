@@ -1,0 +1,44 @@
+{% extends "desk/base.html" %}
+{% block content %}
+<div class="page-head"><div><h1>🚪 Visitors</h1><p>Check people in when they arrive and out when they leave.</p></div></div>
+
+<div class="grid-side">
+  <section class="card">
+    <h2>＋ Check in</h2>
+    <form method="post">{% csrf_token %}
+      <div class="form-grid">{% include "desk/_fields.html" %}</div>
+      <p><button class="btn btn-primary">Check in</button></p>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>In the building now ({{ inside|length }})</h2>
+    {% for v in inside %}
+      <div class="row-link"><span style="flex:1"><b>{{ v.name }}</b>{% if v.people_count > 1 %} +{{ v.people_count|add:"-1" }}{% endif %}{% if v.company %} · {{ v.company }}{% endif %}<br>
+        <small>{% if v.meeting_with %}to see {{ v.meeting_with }} · {% endif %}{{ v.duration }}{% if v.badge %} · badge {{ v.badge }}{% endif %}</small></span>
+        <form class="inline" method="post" action="{% url 'agent:visitor_out' v.pk %}">{% csrf_token %}<button class="btn btn-small">Check out</button></form>
+      </div>
+    {% empty %}<p class="empty">Nobody inside.</p>{% endfor %}
+  </section>
+</div>
+
+<section class="card">
+  <h2>Register</h2>
+  <form class="filters" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search name, phone, company, badge…">
+    <button class="btn">Search</button>{% if q %} <a href="{% url 'agent:visitors' %}">Clear</a>{% endif %}
+    {% if not can.secretary and not q %}<small>Showing the last 30 days. Search to look further back.</small>{% endif %}
+  </form>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>In</th><th>Out</th><th>Name</th><th>Company</th><th>Phone</th><th>Purpose</th><th>To see</th><th>By</th></tr></thead>
+    <tbody>{% for v in page %}
+      <tr><td>{{ v.checked_in_at|date:"d M H:i" }}</td><td>{% if v.checked_out_at %}{{ v.checked_out_at|date:"H:i" }}{% else %}<span class="badge ok">Inside</span>{% endif %}</td>
+        <td><b>{{ v.name }}</b>{% if v.people_count > 1 %} (+{{ v.people_count|add:"-1" }}){% endif %}{% if v.notes %}<br><small>{{ v.notes|truncatechars:80 }}</small>{% endif %}</td>
+        <td>{{ v.company }}</td><td>{{ v.phone }}</td><td>{{ v.purpose|default:"" }}</td><td>{{ v.meeting_with }}</td><td><small>{{ v.registered_by|default:"" }}</small></td></tr>
+    {% empty %}<tr><td colspan="8" class="empty">No visits found.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% if page.has_other_pages %}<p class="actions">{% if page.has_previous %}<a class="btn btn-small" href="?q={{ q|urlencode }}&page={{ page.previous_page_number }}">← Newer</a>{% endif %}
+    <small>Page {{ page.number }} of {{ page.paginator.num_pages }}</small>
+    {% if page.has_next %}<a class="btn btn-small" href="?q={{ q|urlencode }}&page={{ page.next_page_number }}">Older →</a>{% endif %}</p>{% endif %}
+</section>
+{% endblock %}

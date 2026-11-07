@@ -1,0 +1,129 @@
+{% extends "desk/base.html" %}
+
+
+{% block content %}
+<div>
+  <div class="fd-hello">
+    <div>
+      <h1>📺 {{ screen.name }}</h1>
+      <p>Everything you press here changes the TV within a few seconds, and is written to the log.</p>
+    </div>
+    <div class="fd-quick">
+      <a class="fd-btn" href="{% url 'screen' screen.slug %}" target="_blank" rel="noopener">View the screen ↗</a>
+    </div>
+  </div>
+
+  <section class="fd-group agent-status" id="status" data-url="{% url 'agent:screen_status' screen.slug %}">
+    <h2><span aria-hidden="true">📡</span> On the TV now</h2>
+    <p><span id="st-online" class="fd-badge {% if not screen.is_online %}is-alert{% endif %}">{% if screen.is_online %}● Online{% else %}Offline{% endif %}</span>
+       <b id="st-playing">{{ screen.now_playing|default:"-" }}</b></p>
+    <p class="fd-muted">Set to: <span id="st-state">{{ st.describe }}</span>{% if st.updated_by %} · last change by {{ st.updated_by }}{% endif %}</p>
+  </section>
+
+  <div class="agent-grid">
+    <!-- CENTRE OF THE SCREEN -->
+    <section class="fd-group">
+      <h2><span aria-hidden="true">🖥</span> Middle of the screen</h2>
+
+      <div class="agent-row">
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="welcome">
+          <button class="fd-btn{% if st.center == 'welcome' %} fd-btn--primary{% endif %}">👋 Welcome screen</button></form>
+        {% if youtube %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="youtube">
+          <button class="fd-btn{% if st.center == 'youtube' %} fd-btn--primary{% endif %}">▶ YouTube</button></form>{% endif %}
+      </div>
+
+      <h3>🎬 Play a video</h3>
+      {% if videos.items or videos.playlists %}
+      <form method="post" class="agent-form">{% csrf_token %}<input type="hidden" name="action" value="video">
+        <select name="source" required>
+          <option value="">Choose…</option>
+          {% if videos.playlists %}<optgroup label="Playlists">{% for p in videos.playlists %}
+            <option value="playlist:{{ p.pk }}"{% if st.video_playlist_id == p.pk %} selected{% endif %}>📋 {{ p.name }}</option>{% endfor %}</optgroup>{% endif %}
+          <optgroup label="Single videos">{% for v in videos.items %}
+            <option value="item:{{ v.pk }}"{% if not st.video_playlist_id and st.video_item_id == v.pk %} selected{% endif %}>{{ v.title }}</option>{% endfor %}</optgroup>
+        </select>
+        <label class="agent-check"><input type="checkbox" name="muted" value="1"{% if st.video_muted %} checked{% endif %}> No sound (keep the music)</label>
+        <button class="fd-btn fd-btn--primary">▶ Play video</button>
+      </form>
+      {% if st.center == 'video' %}<div class="agent-row">
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="video_next"><button class="fd-btn">⏭ Next video</button></form>
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="video_mute"><button class="fd-btn">{% if st.video_muted %}🔊 Sound on{% else %}🔇 Sound off{% endif %}</button></form>
+      </div>{% endif %}
+      {% else %}<p class="fd-muted">No approved videos yet. Upload one - an admin approves it first.</p>{% endif %}
+
+      <h3>🖼 Photo slideshow</h3>
+      {% if photo_count or photo_lists %}
+      <form method="post" class="agent-form">{% csrf_token %}<input type="hidden" name="action" value="slideshow">
+        <select name="playlist">
+          <option value="">All approved photos ({{ photo_count }})</option>
+          {% for p in photo_lists %}<option value="{{ p.pk }}"{% if st.slideshow_playlist_id == p.pk %} selected{% endif %}>📋 {{ p.name }}</option>{% endfor %}
+        </select>
+        <button class="fd-btn{% if st.center == 'slideshow' %} fd-btn--primary{% endif %}">▶ Show photos</button>
+      </form>
+      {% else %}<p class="fd-muted">No approved photos yet.</p>{% endif %}
+    </section>
+
+    <!-- MUSIC -->
+    <section class="fd-group">
+      <h2><span aria-hidden="true">🎵</span> Background music</h2>
+      {% if music.items or music.playlists %}
+      <form method="post" class="agent-form">{% csrf_token %}<input type="hidden" name="action" value="music_play">
+        <select name="source" required>
+          <option value="">Choose…</option>
+          {% if music.playlists %}<optgroup label="Playlists">{% for p in music.playlists %}
+            <option value="playlist:{{ p.pk }}"{% if st.music_playlist_id == p.pk %} selected{% endif %}>📋 {{ p.name }}</option>{% endfor %}</optgroup>{% endif %}
+          <optgroup label="Single tracks">{% for m in music.items %}
+            <option value="item:{{ m.pk }}"{% if not st.music_playlist_id and st.music_item_id == m.pk %} selected{% endif %}>{{ m.title }}</option>{% endfor %}</optgroup>
+        </select>
+        <label class="agent-check"><input type="checkbox" name="shuffle" value="1"{% if st.music_shuffle %} checked{% endif %}> Shuffle</label>
+        <button class="fd-btn fd-btn--primary">▶ Play music</button>
+      </form>
+      {% if st.music_on %}<div class="agent-row">
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="music_next"><button class="fd-btn">⏭ Next song</button></form>
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="music_stop"><button class="fd-btn agent-stop">⏹ Stop music</button></form>
+      </div>{% endif %}
+      <p class="fd-muted">Music pauses by itself while a video plays with sound.</p>
+      {% else %}<p class="fd-muted">No approved music yet. Upload tracks - an admin approves them first.</p>{% endif %}
+
+      <h3>🔊 Volume</h3>
+      <form method="post" class="agent-form agent-volume">{% csrf_token %}<input type="hidden" name="action" value="volume">
+        <input type="range" name="volume" min="0" max="100" step="5" value="{{ st.volume }}" oninput="this.nextElementSibling.textContent=this.value+'%'">
+        <b>{{ st.volume }}%</b>
+        <button class="fd-btn">Set</button>
+      </form>
+
+      {% if occasions %}
+      <h3>🎉 Occasions</h3>
+      <p class="fd-muted">A celebration takes over the screen: its photos, videos and songs, its greeting and festive look.</p>
+      {% for occ, running in occasions %}
+      <form method="post" class="agent-form">{% csrf_token %}<input type="hidden" name="occasion" value="{{ occ.pk }}">
+        <b>{{ occ.name }}</b>{% if running %} <span class="fd-badge is-ok">Playing</span>{% endif %}
+        {% if running %}<input type="hidden" name="action" value="occasion_stop"><button class="fd-btn agent-stop">⏹ Stop</button>
+        {% else %}<input type="hidden" name="action" value="occasion_play"><button class="fd-btn fd-btn--primary">▶ Play now</button>{% endif %}
+      </form>
+      {% endfor %}
+      {% endif %}
+
+      <h3>🛠 If the TV looks stuck</h3>
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="reload"><button class="fd-btn">↻ Reload the screen</button></form>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const box = document.getElementById('status');
+  async function refresh() {
+    try {
+      const d = await (await fetch(box.dataset.url, { cache: 'no-store' })).json();
+      const on = document.getElementById('st-online');
+      on.textContent = d.online ? '● Online' : 'Offline';
+      on.classList.toggle('is-alert', !d.online);
+      document.getElementById('st-playing').textContent = d.now_playing || '-';
+      document.getElementById('st-state').textContent = d.state;
+    } catch (e) {}
+  }
+  setInterval(refresh, 4000);
+})();
+</script>
+{% endblock %}

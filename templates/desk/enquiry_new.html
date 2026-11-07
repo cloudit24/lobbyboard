@@ -1,0 +1,11 @@
+{% extends "desk/base.html" %}
+{% block content %}
+<div class="page-head"><div><p><a href="{% url 'agent:enquiries' %}">← Enquiries</a></p><h1>Log an enquiry</h1>
+  <p>For phone calls and walk-ins. It is given to you; a secretary can pass it on.</p></div></div>
+<section class="card">
+  <form method="post">{% csrf_token %}
+    <div class="form-grid">{% include "desk/_fields.html" %}</div>
+    <p><button class="btn btn-primary">Save enquiry</button></p>
+  </form>
+</section>
+{% endblock %}

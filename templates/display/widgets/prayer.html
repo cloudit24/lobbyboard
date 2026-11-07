@@ -1,0 +1,21 @@
+{% load static %}
+<div class="card prayer-card prayer-bottom" data-name="prayer">
+  <div class="p-title"><i data-icon="mosque"></i> أوقات الصلاة · Prayer Times</div>
+  <div class="countdown" id="countdown">
+    <svg class="cd-ring" viewBox="0 0 160 160" aria-hidden="true">
+      <defs><linearGradient id="cdg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="var(--a1)"/><stop offset="1" stop-color="var(--gold)"/></linearGradient></defs>
+      <circle cx="80" cy="80" r="70" class="cd-track"/>
+      <circle cx="80" cy="80" r="70" class="cd-ticks"/>
+      <circle cx="80" cy="80" r="70" class="cd-prog" id="cd-prog" pathLength="100"/>
+      <circle r="5" class="cd-head" id="cd-head" cx="80" cy="10"/>
+    </svg>
+    <div class="cd-mid">
+      <div class="cd-label">الصلاة القادمة · Next</div>
+      <div class="cd-name-ar" id="cd-name-ar">--</div>
+      <div class="cd-time" id="cd-time">--:--:--</div>
+      <div class="cd-name" id="cd-name">--</div>
+    </div>
+  </div>
+  <div class="prayer-list" id="prayer-list"><div class="loading">Loading…</div></div>
+</div>

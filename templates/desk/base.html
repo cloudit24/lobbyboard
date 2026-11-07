@@ -1,0 +1,52 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} · {{ brand }}</title>
+{% if theme.font_family %}<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family={{ theme.font_family|urlencode }}:wght@400;600;700&display=swap">{% endif %}
+<link rel="stylesheet" href="{% static 'desk/desk.css' %}?v=1">
+<style>
+  :root {
+    --primary: {{ theme.primary }}; --primary-dark: {{ theme.primary_dark }};
+    --secondary: {{ theme.secondary }}; --bg: {{ theme.background }};
+    {% if theme.font_family %}--font: "{{ theme.font_family }}", system-ui, sans-serif;{% endif %}
+  }
+</style>
+</head>
+<body>
+<header class="d-header">
+  <a class="d-brand" href="{% url 'agent:home' %}">
+    <span class="d-logo">{% if brand_logo %}<img src="{{ brand_logo }}" alt="">{% else %}{{ brand_initials|default:"◆" }}{% endif %}</span>
+    <span>{{ brand }}<small>Desk</small></span>
+  </a>
+  {% if user.is_authenticated %}
+  <div class="d-user">
+    <span>{% firstof user.profile.display_name user.first_name user.username %}</span>
+    {% if user.is_staff %}<a href="{% url 'admin:index' %}">Admin panel</a>{% endif %}
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button>Log out</button></form>
+  </div>
+  {% endif %}
+</header>
+{% if user.is_authenticated %}{% with p=request.path %}
+<nav class="d-nav">
+  <a href="{% url 'agent:home' %}"{% if p == '/agent/' %} class="on"{% endif %}>Home</a>
+  {% if can.visitors %}<a href="{% url 'agent:visitors' %}"{% if '/agent/visitors/' in p %} class="on"{% endif %}>Visitors</a>{% endif %}
+  {% if can.enquiries %}<a href="{% url 'agent:enquiries' %}"{% if '/agent/enquiries/' in p %} class="on"{% endif %}>Enquiries</a>{% endif %}
+  {% if can.tv %}<a href="{% url 'agent:tv' %}"{% if '/agent/tv/' in p or '/agent/screen/' in p %} class="on"{% endif %}>TVs</a>{% endif %}
+  {% if can.upload %}<a href="{% url 'agent:upload' %}"{% if '/agent/upload/' in p %} class="on"{% endif %}>Upload</a>{% endif %}
+  {% if can.secretary %}
+  <span class="d-nav-sep"></span>
+  <a href="{% url 'agent:team' %}"{% if '/agent/team/' in p %} class="on"{% endif %}>Team</a>
+  <a href="{% url 'agent:reports' %}"{% if '/agent/reports/' in p %} class="on"{% endif %}>Reports</a>
+  {% endif %}
+</nav>
+{% endwith %}{% endif %}
+
+<main class="d-main">
+  {% if messages %}<div class="d-messages">{% for m in messages %}<div class="d-msg d-msg--{{ m.tags }}">{{ m }}</div>{% endfor %}</div>{% endif %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

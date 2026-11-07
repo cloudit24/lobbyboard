@@ -1,0 +1,8 @@
+{% for f in form %}{% if f.is_hidden %}{{ f }}{% else %}
+<div class="field{% if f.field.widget.input_type == 'checkbox' or f.name in wide %} wide{% endif %}{% if f.widget_type == 'textarea' or f.widget_type == 'checkboxselectmultiple' %} wide{% endif %}">
+  <label for="{{ f.id_for_label }}">{{ f.label }}{% if f.field.required %} *{% endif %}</label>
+  {{ f }}
+  {% if f.help_text %}<div class="help">{{ f.help_text|safe }}</div>{% endif %}
+  {{ f.errors }}
+</div>{% endif %}{% endfor %}
+{% if form.non_field_errors %}<div class="field wide">{{ form.non_field_errors }}</div>{% endif %}

@@ -1,0 +1,84 @@
+{% extends "desk/base.html" %}
+{% block content %}
+<div class="page-head">
+  <div><p><a href="{% url 'agent:enquiries' %}">← Enquiries</a></p>
+    <h1>{{ enq.ref }} · {{ enq.subject }}</h1>
+    <p><span class="badge st-{{ enq.status }}">{{ enq.get_status_display }}</span> · {{ enq.queue|default:"No topic" }} · {{ enq.get_source_display }} · received {{ enq.created_at|date:"d M Y H:i" }}</p>
+  </div>
+  <div class="actions">
+    {% if enq.assigned_to != user %}<form class="inline" method="post">{% csrf_token %}<input type="hidden" name="action" value="take"><button class="btn btn-primary">Take it - make it mine</button></form>{% endif %}
+    {% if enq.status != 'closed' %}<form class="inline" method="post">{% csrf_token %}<input type="hidden" name="action" value="status"><input type="hidden" name="status" value="closed"><button class="btn">✓ Close</button></form>
+    {% else %}<form class="inline" method="post">{% csrf_token %}<input type="hidden" name="action" value="status"><input type="hidden" name="status" value="open"><button class="btn">Reopen</button></form>{% endif %}
+  </div>
+</div>
+
+<div class="grid-side">
+  <div>
+    <div class="thread">
+    {% for m in thread %}
+      <div class="msg {{ m.kind }}">
+        <div class="msg-head">
+          <span><b>{% if m.kind == 'in' %}{{ enq.customer_name|default:m.from_email }}{% elif m.kind == 'note' %}📝 Note by {% firstof m.sent_by.profile.display_name m.sent_by.first_name m.sent_by.username %}{% else %}↩ {{ m.from_email }}{% endif %}</b>
+            {% if m.cc %}<br>cc {{ m.cc }}{% endif %}</span>
+          <span>{{ m.created_at|date:"d M Y H:i" }}</span>
+        </div>
+        {% if m.send_error %}<div class="d-msg d-msg--error">Not sent: {{ m.send_error }}</div>{% endif %}
+        <div class="msg-body">{{ m.body }}</div>
+        {% if m.attachments.all %}<p>{% for a in m.attachments.all %}<a class="btn btn-small" href="{% url 'agent:attachment' a.pk %}">📎 {{ a.filename }}</a> {% endfor %}</p>{% endif %}
+      </div>
+    {% endfor %}
+    </div>
+
+    {% if enq.customer_email %}
+    <section class="card" style="margin-top:20px">
+      <h2>↩ Reply</h2>
+      <p><small>Sent as <b>{{ sender }}</b> to {{ enq.customer_email }}. Official addresses are copied automatically.</small></p>
+      {% if not mail_ready %}<div class="d-msg d-msg--warning">Sending isn't set up yet (Admin → Mail settings). Your reply will be saved but not sent.</div>{% endif %}
+      <form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="action" value="reply">
+        {% with form=reply_form %}{% include "desk/_fields.html" %}{% endwith %}
+        <div class="field"><label>Attach files</label><input type="file" name="files" multiple></div>
+        <p><button class="btn btn-primary">Send reply</button></p>
+      </form>
+    </section>
+    {% else %}<p class="d-msg d-msg--warning" style="margin-top:20px">No email address for this customer - call them on {{ enq.customer_phone|default:"their number" }} and add a note.</p>{% endif %}
+
+    <section class="card">
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="note">
+        {% with form=note_form %}{% include "desk/_fields.html" %}{% endwith %}
+        <p><button class="btn">Add note</button></p>
+      </form>
+    </section>
+  </div>
+
+  <aside>
+    <section class="card">
+      <h2>Customer</h2>
+      <dl class="kv">
+        <dt>Name</dt><dd>{{ enq.customer_name|default:"-" }}</dd>
+        <dt>Email</dt><dd>{{ enq.customer_email|default:"-" }}</dd>
+        <dt>Phone</dt><dd>{{ enq.customer_phone|default:"-" }}</dd>
+        <dt>Agent</dt><dd>{% if enq.assigned_to %}{% firstof enq.assigned_to.profile.display_name enq.assigned_to.first_name enq.assigned_to.username %}{% else %}Nobody yet{% endif %}</dd>
+        <dt>First reply</dt><dd>{% if enq.first_reply_at %}after {{ enq.created_at|timesince:enq.first_reply_at }}{% else %}not yet{% endif %}</dd>
+      </dl>
+    </section>
+    <section class="card">
+      <h2>Status</h2>
+      <form method="post" class="actions">{% csrf_token %}<input type="hidden" name="action" value="status">
+        <select name="status">{% for k, v in statuses %}<option value="{{ k }}"{% if enq.status == k %} selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+        <button class="btn btn-small">Set</button></form>
+    </section>
+    {% if secretary %}
+    <section class="card">
+      <h2>Secretary</h2>
+      <form method="post" class="actions">{% csrf_token %}<input type="hidden" name="action" value="assign">
+        <select name="agent"><option value="">- Nobody -</option>{% for a in agents %}<option value="{{ a.pk }}"{% if enq.assigned_to_id == a.pk %} selected{% endif %}>{% firstof a.profile.display_name a.get_full_name a.username %}</option>{% endfor %}</select>
+        <button class="btn btn-small">Give to</button></form>
+      <br>
+      <form method="post" class="actions">{% csrf_token %}<input type="hidden" name="action" value="topic">
+        <select name="queue"><option value="">- No topic -</option>{% for t in topics %}<option value="{{ t.pk }}"{% if enq.queue_id == t.pk %} selected{% endif %}>{{ t.name }}</option>{% endfor %}</select>
+        <button class="btn btn-small">Move topic</button></form>
+    </section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

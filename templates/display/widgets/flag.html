@@ -1,0 +1,6 @@
+{% load static %}
+<div class="card flag-card" data-name="flag">
+  <div class="flag-photo" hidden style="--img:url('{% get_media_prefix %}display/flag.jpg')"><img src="{% get_media_prefix %}display/flag.jpg" alt="UAE flag" onload="const c=this.closest('.flag-card');c.classList.add('has-photo');this.parentElement.hidden=false"></div>
+  <video class="flag flag-video" id="flag-video" src="{% get_media_prefix %}display/flag.mp4" muted loop playsinline autoplay preload="auto" hidden></video>
+  <canvas class="flag" id="flag" aria-label="UAE flag"></canvas>
+</div>

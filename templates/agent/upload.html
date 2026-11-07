@@ -1,0 +1,44 @@
+{% extends "desk/base.html" %}
+
+
+{% block content %}
+<div>
+  <div class="fd-hello">
+    <div>
+      <h1>⬆ Upload files</h1>
+      <p>Videos, music and photos. An admin checks each file and puts it in order before it can be played.</p>
+    </div>
+  </div>
+
+  <section class="fd-group">
+    <h2><span aria-hidden="true">📤</span> New upload</h2>
+    <form method="post" enctype="multipart/form-data" class="agent-form agent-upload">{% csrf_token %}
+      <label>Files <input type="file" name="files" multiple required accept="{{ accept }}"></label>
+      <label>Title <small class="fd-muted">(only used when you upload one file; otherwise the file name is used)</small>
+        <input type="text" name="title" maxlength="200"></label>
+      <p class="fd-muted">Allowed: {{ accept }} · up to {{ max_mb }} MB each. For video use MP4 (H.264) - it plays on every TV.</p>
+      <button class="fd-btn fd-btn--primary">⬆ Upload</button>
+    </form>
+  </section>
+
+  <section class="fd-group">
+    <h2><span aria-hidden="true">🗂</span> My uploads</h2>
+    {% if mine %}
+    <table class="agent-table">
+      <thead><tr><th>File</th><th>Type</th><th>Uploaded</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for m in mine %}
+        <tr>
+          <td><b>{{ m.title }}</b>{% if m.review_note %}<br><small class="fd-muted">Admin: {{ m.review_note }}</small>{% endif %}</td>
+          <td>{{ m.get_kind_display }}</td>
+          <td>{{ m.uploaded_at|date:"d M Y H:i" }}</td>
+          <td><span class="fd-badge{% if m.status == 'rejected' %} is-alert{% endif %}">{{ m.get_status_display }}</span></td>
+          <td>{% if m.status == 'pending' %}<form method="post" action="{% url 'agent:delete_upload' m.pk %}">{% csrf_token %}<button class="fd-btn agent-stop">Withdraw</button></form>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="fd-muted">You haven't uploaded anything yet.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

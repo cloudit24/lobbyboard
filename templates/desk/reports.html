@@ -1,0 +1,39 @@
+{% extends "desk/base.html" %}
+{% block content %}
+<div class="page-head">
+  <div><h1>📊 Reports</h1><p>{{ start|date:"d M Y" }} to {{ end|date:"d M Y" }}</p></div>
+  <form class="filters" method="get" style="margin:0">
+    <input type="date" name="from" value="{{ start|date:'Y-m-d' }}"> <input type="date" name="to" value="{{ end|date:'Y-m-d' }}">
+    <button class="btn">Show</button>
+    <button class="btn btn-primary" name="export" value="xlsx">⬇ Excel</button>
+  </form>
+</div>
+
+<div class="tiles">
+  <div class="tile"><b>{{ d.visits_total }}</b><span>Visits ({{ d.visitors_people }} people)</span></div>
+  <div class="tile"><b>{{ d.enq_total }}</b><span>Enquiries received</span></div>
+  <div class="tile"><b>{{ d.avg_first_reply }}</b><span>Average time to first reply</span></div>
+  <div class="tile{% if d.unanswered %} is-alert{% endif %}"><b>{{ d.unanswered }}</b><span>Open and not answered yet</span></div>
+</div>
+
+<div class="grid2">
+  <section class="card"><h2>Enquiries by topic</h2>
+    <table class="table">{% for r in d.enq_by_topic %}<tr><td>{{ r.queue__name|default:"No topic" }}</td><td style="text-align:right"><b>{{ r.n }}</b></td></tr>{% empty %}<tr><td class="empty">None.</td></tr>{% endfor %}</table>
+    <h3>By status</h3>
+    <table class="table">{% for label, n in d.enq_by_status %}<tr><td>{{ label }}</td><td style="text-align:right"><b>{{ n }}</b></td></tr>{% endfor %}</table>
+    <h3>How they came in</h3>
+    <table class="table">{% for label, n in d.enq_by_source %}<tr><td>{{ label }}</td><td style="text-align:right"><b>{{ n }}</b></td></tr>{% endfor %}</table>
+  </section>
+  <section class="card"><h2>Visits by purpose</h2>
+    <table class="table">{% for r in d.visits_by_purpose %}<tr><td>{{ r.purpose__name|default:"Not given" }}</td><td style="text-align:right"><b>{{ r.n }}</b></td></tr>{% empty %}<tr><td class="empty">None.</td></tr>{% endfor %}</table>
+    <h3>Visits per day</h3>
+    <table class="table">{% for r in d.visits_by_day %}<tr><td>{{ r.day|date:"D d M" }}</td><td style="width:60%"><div class="bar" style="width:{% widthratio r.n d.visits_total 100 %}%"></div></td><td style="text-align:right">{{ r.n }}</td></tr>{% endfor %}</table>
+  </section>
+</div>
+
+<section class="card"><h2>Per agent</h2><div class="table-wrap"><table class="table">
+  <thead><tr><th>Agent</th><th>Enquiries</th><th>Closed</th><th>Replies sent</th><th>Visitors checked in</th><th>TV actions</th></tr></thead>
+  <tbody>{% for r in d.per_agent %}<tr><td><b>{{ r.name }}</b></td><td>{{ r.enquiries }}</td><td>{{ r.closed }}</td><td>{{ r.replies }}</td><td>{{ r.visitors }}</td><td>{{ r.tv_actions }}</td></tr>
+  {% empty %}<tr><td colspan="6" class="empty">No activity in this period.</td></tr>{% endfor %}</tbody>
+</table></div></section>
+{% endblock %}

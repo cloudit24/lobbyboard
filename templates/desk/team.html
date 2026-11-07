@@ -1,0 +1,18 @@
+{% extends "desk/base.html" %}
+{% block content %}
+<div class="page-head">
+  <div><h1>👥 Team</h1><p>Agents, what they handle, and who can log in. Admins and secretaries are managed in the admin panel.</p></div>
+  <div class="actions"><a class="btn btn-primary" href="{% url 'agent:team_new' %}">＋ Add agent</a></div>
+</div>
+<section class="card"><div class="table-wrap"><table class="table">
+  <thead><tr><th>Name</th><th>Username</th><th>Roles</th><th>Enquiry topics</th><th>Last login</th><th></th></tr></thead>
+  <tbody>{% for p in people %}
+    <tr><td><b>{% firstof p.profile.display_name p.get_full_name p.username %}</b>{% if not p.is_active %} <span class="badge alert">Can't log in</span>{% endif %}<br><small>{{ p.email }}</small></td>
+      <td>{{ p.username }}</td>
+      <td>{% for g in p.groups.all %}<span class="badge">{{ g.name }}</span> {% endfor %}</td>
+      <td>{% for q in p.queues.all %}{{ q.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
+      <td><small>{% if p.last_login %}{{ p.last_login|timesince }} ago{% else %}never{% endif %}</small></td>
+      <td>{% if not p.is_staff and not p.is_superuser %}<a class="btn btn-small" href="{% url 'agent:team_edit' p.pk %}">Edit</a>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="6" class="empty">No agents yet.</td></tr>{% endfor %}</tbody>
+</table></div></section>
+{% endblock %}

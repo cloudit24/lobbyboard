@@ -1,0 +1,90 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title|default:APP_NAME }} · {{ screen.name }}</title>
+<link rel="stylesheet" href="{% static 'display/screen.css' %}">
+</head>
+<body>
+<!-- Living background: aurora colours follow the time of day (dawn, day, dusk, night). -->
+<div class="bg" aria-hidden="true">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+  <canvas id="particles"></canvas>
+  <div class="grid-floor"></div>
+</div>
+
+<div class="dash" id="dash">
+
+  <!-- ═══ TOP BAR ═══ -->
+  <header class="topbar">
+    <div class="logo-area">
+      <div class="logo-badge" id="logo-badge">{% if config.logoUrl %}<img src="{{ config.logoUrl }}" alt="">{% else %}{{ config.logoInitials }}{% endif %}</div>
+      <div>
+        <div class="logo-name">{{ config.logoNameAr }}</div>
+        <div class="logo-name-en">{{ config.logoNameEn }}</div>
+        <div class="logo-tag">{{ config.logoTag }}</div>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div class="org-name-ar shimmer">{{ config.orgNameAr }}</div>
+      <div class="org-name-en">{{ config.orgNameEn }}</div>
+      <div class="insight" id="insight"></div>
+    </div>
+    <div class="topbar-right">
+      <div class="clock" id="clock" aria-label="Time"></div>
+      <div class="sec-bar"><i id="sec-bar"></i></div>
+      <div class="date"><span id="date"></span><span class="hijri-date" id="hijri-date"></span></div>
+    </div>
+  </header>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main grid-layout">
+    {% for w in widgets %}
+    <div class="cell cell-{{ w.t }}" style="grid-column:{{ w.x|add:1 }} / span {{ w.w }};grid-row:{{ w.y|add:1 }} / span {{ w.h }}">
+      {% include w.template %}
+    </div>
+    {% endfor %}
+  </main>
+
+  <!-- ═══ BOTTOM TICKER ═══ -->
+  <footer class="ticker-bar">
+    <div class="ticker-lbl"><div class="live-dot"></div> {{ config.tickerLabel|default:"News" }}</div>
+    <div class="ticker-viewport"><div class="ticker-track" id="ticker-track"></div></div>
+  </footer>
+
+  <!-- Dims the rest while the auto tour brings one card forward. -->
+  <div class="spot-veil" id="spot-veil"></div>
+
+  <!-- First minute of each prayer: a calm full-screen moment. -->
+  <div class="adhan" id="adhan">
+    <div class="adhan-in">
+      <div class="adhan-rings"><i></i><i></i><i></i></div>
+      <div class="adhan-icon"><i data-icon="mosque"></i></div>
+      <div class="adhan-ar" id="adhan-ar"></div>
+      <div class="adhan-en" id="adhan-en"></div>
+      <div class="adhan-time" id="adhan-time"></div>
+    </div>
+  </div>
+</div>
+
+<audio id="music" preload="auto"></audio>
+<div class="sound-gate" id="sound-gate"><i data-icon="sound"></i><br><b>Touch or click once</b> to allow sound<br><small>المس الشاشة مرة لتشغيل الصوت</small></div>
+
+{{ config|json_script:"tv-config" }}
+<script>
+  window.TV = {
+    slug: "{{ screen.slug|escapejs }}",
+    contentVersion: {{ content_version }},
+    stateUrl: "{% url 'screen_state' screen.slug %}",
+    weatherUrl: "{% url 'api_weather' %}",
+    prayerUrl: "{% url 'api_prayer' %}",
+    newsUrl: "{% url 'api_news' %}",
+    newsArUrl: "{% url 'api_news_ar' %}",
+    aboutUrl: "{% url 'api_about' %}",
+  };
+</script>
+<script src="{% static 'display/icons.js' %}"></script>
+<script src="{% static 'display/screen.js' %}"></script>
+</body>
+</html>

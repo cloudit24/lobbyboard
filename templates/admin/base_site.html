@@ -1,0 +1,53 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{# Look and feel: static/admin-theme/admin-theme.css - rules in docs/ADMIN-DESIGN.md #}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ APP_NAME }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin-theme/admin-theme.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'agent/agent.css' %}?v=1">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% if user.is_staff %}{% url 'admin:index' %}{% else %}{% url 'agent:home' %}{% endif %}">{{ APP_NAME }} <small>{% if is_agent_page %}Agent panel{% else %}Admin{% endif %}</small></a></div>
+{% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block usertools %}
+{% if user.is_authenticated and not user.is_staff %}
+<div id="user-tools">
+  Welcome, <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+  <form id="logout-form" method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Log out</button></form>
+  {% include "admin/color_theme_toggle.html" %}
+</div>
+{% else %}{{ block.super }}{% endif %}
+{% endblock %}
+
+{% block header %}
+{{ block.super }}
+{% if user.is_authenticated %}{% with p=request.path %}
+<nav id="fd-bar" aria-label="Shortcuts">
+  {% if user.is_staff %}
+  <a href="{% url 'admin:index' %}"{% if p == '/admin/' %} class="is-current" aria-current="page"{% endif %}>Dashboard</a>
+  <a href="{% url 'admin:screens_screen_changelist' %}"{% if '/admin/screens/' in p %} class="is-current"{% endif %}>Screens</a>
+  <a href="{% url 'admin:library_mediaitem_changelist' %}?status__exact=pending"{% if '/admin/library/mediaitem/' in p %} class="is-current"{% endif %}>Media &amp; uploads</a>
+  <a href="{% url 'admin:library_playlist_changelist' %}"{% if '/admin/library/playlist/' in p %} class="is-current"{% endif %}>Playlists</a>
+  <a href="{% url 'admin:core_displaysettings_changelist' %}"{% if '/admin/core/displaysettings/' in p %} class="is-current"{% endif %}>Display settings</a>
+  <a href="{% url 'admin:core_tickermessage_changelist' %}"{% if '/admin/core/tickermessage/' in p or '/admin/core/newsfeed/' in p %} class="is-current"{% endif %}>News &amp; ticker</a>
+  <a href="{% url 'admin:inbox_mailsettings_changelist' %}"{% if '/admin/inbox/' in p %} class="is-current"{% endif %}>Enquiries &amp; mail</a>
+  <a href="{% url 'admin:auth_user_changelist' %}"{% if '/admin/auth/' in p or '/admin/people/' in p %} class="is-current"{% endif %}>People</a>
+  <a href="{% url 'admin:core_networksettings_changelist' %}"{% if '/admin/core/networksettings/' in p or '/admin/core/themesettings/' in p %} class="is-current"{% endif %}>Network &amp; theme</a>
+  <a href="{% url 'admin:audit_auditlog_changelist' %}"{% if '/admin/audit/' in p %} class="is-current"{% endif %}>Logs</a>
+  <a class="fd-bar-site{% if '/agent/' in p %} is-current{% endif %}" href="{% url 'agent:home' %}">Desk dashboard</a>
+  {% for s in fd_bar_screens %}<a href="{% url 'screen' s.slug %}" target="_blank" rel="noopener">View {{ s.name }} ↗</a>{% endfor %}
+  {% else %}
+  {% for s in agent_screens %}<a href="{% url 'agent:screen' s.slug %}"{% if '/agent/screen/'|add:s.slug|add:'/' == p %} class="is-current"{% endif %}>📺 {{ s.name }}</a>{% endfor %}
+  <a href="{% url 'agent:upload' %}"{% if '/agent/upload/' in p %} class="is-current"{% endif %}>⬆ Upload files</a>
+  {% endif %}
+</nav>
+{% endwith %}{% endif %}
+{% endblock %}

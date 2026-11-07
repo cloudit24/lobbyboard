@@ -1,0 +1,14 @@
+{% extends "desk/base.html" %}
+{% block content %}
+<section class="card" style="max-width:420px;margin:40px auto">
+  <h1>Log in</h1>
+  <p class="muted">Agents, secretaries and admins.</p>
+  {% if form.errors %}<div class="d-msg d-msg--error">Wrong username or password. Please try again.</div>{% endif %}
+  <form method="post">{% csrf_token %}
+    <div class="field"><label for="id_username">Username</label>{{ form.username }}</div>
+    <div class="field" style="margin-top:10px"><label for="id_password">Password</label>{{ form.password }}</div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <p><button class="btn btn-primary" style="width:100%;justify-content:center">Log in</button></p>
+  </form>
+</section>
+{% endblock %}

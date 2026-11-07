@@ -1,0 +1,37 @@
+{% extends "desk/base.html" %}
+{% block content %}
+<div class="page-head">
+  <div><h1>📨 Enquiries</h1><p>Emails and website messages, sorted by topic. Replies go out with your name.</p></div>
+  <div class="actions"><a class="btn btn-primary" href="{% url 'agent:enquiry_new' %}">＋ Log a phone / walk-in enquiry</a></div>
+</div>
+{% if not mail.enabled %}<div class="d-msg d-msg--warning" style="margin-bottom:16px">The mailbox is not switched on yet, so new emails don't arrive here. An admin sets it up in Admin → Mail settings.</div>{% endif %}
+
+<div class="tabs">
+  <a href="?tab=mine" class="{% if tab == 'mine' %}on{% endif %}">Mine</a>
+  <a href="?tab=unassigned" class="{% if tab == 'unassigned' %}on{% endif %}">Not taken</a>
+  <a href="?tab=open" class="{% if tab == 'open' %}on{% endif %}">All open</a>
+  <a href="?tab=closed" class="{% if tab == 'closed' %}on{% endif %}">Closed</a>
+</div>
+
+<section class="card">
+  <form class="filters" method="get"><input type="hidden" name="tab" value="{{ tab }}">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search #number, name, email, subject…">
+    <select name="topic"><option value="">All topics</option>{% for t in topics %}<option value="{{ t.pk }}"{% if topic == t.pk|stringformat:"s" %} selected{% endif %}>{{ t.name }}</option>{% endfor %}</select>
+    <select name="status"><option value="">Any status</option>{% for k, v in statuses %}<option value="{{ k }}"{% if status == k %} selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+    <button class="btn">Filter</button>
+  </form>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>#</th><th>Subject</th><th>Customer</th><th>Topic</th><th>Agent</th><th>Status</th><th>Last activity</th></tr></thead>
+    <tbody>{% for e in page %}
+      <tr onclick="location='{% url 'agent:enquiry' e.pk %}'" style="cursor:pointer">
+        <td><a href="{% url 'agent:enquiry' e.pk %}">{{ e.ref }}</a></td><td><b>{{ e.subject|truncatechars:70 }}</b></td>
+        <td>{{ e.customer_name|default:"" }}<br><small>{{ e.customer_email|default:e.customer_phone }}</small></td>
+        <td>{{ e.queue|default:"-" }}</td><td>{% if e.assigned_to %}{% firstof e.assigned_to.profile.display_name e.assigned_to.first_name e.assigned_to.username %}{% else %}<span class="badge alert">Nobody</span>{% endif %}</td>
+        <td><span class="badge st-{{ e.status }}">{{ e.get_status_display }}</span></td><td><small>{{ e.updated_at|timesince }} ago</small></td></tr>
+    {% empty %}<tr><td colspan="7" class="empty">Nothing here.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% if page.has_other_pages %}<p class="actions">{% if page.has_previous %}<a class="btn btn-small" href="?tab={{ tab }}&q={{ q|urlencode }}&page={{ page.previous_page_number }}">← Newer</a>{% endif %}
+    <small>Page {{ page.number }} of {{ page.paginator.num_pages }}</small>
+    {% if page.has_next %}<a class="btn btn-small" href="?tab={{ tab }}&q={{ q|urlencode }}&page={{ page.next_page_number }}">Older →</a>{% endif %}</p>{% endif %}
+</section>
+{% endblock %}

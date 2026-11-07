@@ -1,0 +1,22 @@
+/* Agent panel extras. Colours and shapes come from admin-theme.css (never type a
+   colour here - use its variables). See docs/ADMIN-DESIGN.md. */
+.agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .agent-grid { grid-template-columns: 1fr; } }
+.agent-page .fd-group h3 {
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--fd-muted); margin: 18px 0 8px; padding: 0; background: none;
+}
+.agent-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.agent-row form { margin: 0; }
+.agent-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 8px; }
+.agent-form select, .agent-form input[type=text] { min-width: 240px; flex: 1; }
+.agent-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.agent-volume input[type=range] { flex: 1; min-width: 160px; accent-color: var(--button-bg); }
+.agent-upload { flex-direction: column; align-items: stretch; }
+.agent-upload label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
+.agent-stop { color: var(--fd-alert) !important; border-color: var(--fd-alert) !important; }
+.agent-status p { margin: 6px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.agent-table { width: 100%; border-collapse: collapse; }
+.agent-table th, .agent-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--fd-line); vertical-align: middle; }
+.agent-table form { margin: 0; }
+.agent-page button.fd-btn { cursor: pointer; font-family: inherit; }

@@ -1,0 +1,6 @@
+{% load static %}
+<div class="card news-card{% if not config.showNews %} hidden{% endif %}" data-name="news">
+  <div class="p-title"><i data-icon="news"></i><span id="news-title">آخر الأخبار · Latest News</span><span class="news-count" id="news-count"></span></div>
+  <div class="news-stage" id="news-list"><div class="loading">Loading news…</div></div>
+  <div class="about-stage" id="about-stage"></div>
+</div>

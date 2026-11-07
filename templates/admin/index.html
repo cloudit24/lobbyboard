@@ -1,0 +1,87 @@
+{% extends "admin/base_site.html" %}
+{% load log %}
+
+{% block bodyclass %}{{ block.super }} dashboard fd-dashboard{% endblock %}
+{% block coltype %}colM{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<div id="content-main" class="fd-dash">
+
+<div class="fd-hello">
+  <div>
+    <h1>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</h1>
+    <p>Choose what you want to change. Every change is saved in history and can be undone.</p>
+  </div>
+  {% if fd_quick %}<div class="fd-quick">
+    {% for q in fd_quick %}<a class="fd-btn{% if forloop.first %} fd-btn--primary{% endif %}" href="{{ q.url }}"{% if q.new_tab %} target="_blank" rel="noopener"{% endif %}>{{ q.label }}</a>{% endfor %}
+  </div>{% endif %}
+</div>
+
+{% if fd_stats %}<div class="fd-stats">
+  {% for s in fd_stats %}<a class="fd-stat{% if s.alert %} is-alert{% endif %}" {% if s.url %}href="{{ s.url }}"{% endif %}>
+    <b class="{% if s.small %}is-small{% endif %}">{{ s.value }}</b><span>{{ s.label }}</span>
+  </a>{% endfor %}
+</div>{% endif %}
+
+<div class="fd-layout">
+  <div class="fd-groups">
+  {% for g in fd_groups %}
+    <section class="fd-group">
+      <h2><span aria-hidden="true">{{ g.icon }}</span> {{ g.title }}</h2>
+      <ul>
+      {% for i in g.items %}
+        <li>
+          <a class="fd-item" href="{{ i.url|default:'#' }}">
+            <span class="fd-item-icon" aria-hidden="true">{{ i.icon }}</span>
+            <span class="fd-item-text"><b>{{ i.label }}</b>{% if i.desc %}<small>{{ i.desc }}</small>{% endif %}</span>
+            {% if i.badge %}<span class="fd-badge{% if i.badge.alert %} is-alert{% endif %}">{{ i.badge.n }} {{ i.badge.text }}</span>{% endif %}
+          </a>
+          {% if i.add_url %}<a class="fd-add" href="{{ i.add_url }}" title="Add {{ i.label }}" aria-label="Add {{ i.label }}">＋</a>{% endif %}
+        </li>
+      {% endfor %}
+      </ul>
+    </section>
+  {% empty %}
+    <p>You don't have permission to edit anything yet. Ask another admin to give you access.</p>
+  {% endfor %}
+  </div>
+
+  <aside class="fd-side">
+    {% if fd_screens %}<section class="fd-group">
+      <h2><span aria-hidden="true">📺</span> Screens now</h2>
+      <ul class="fd-log">
+      {% for s in fd_screens %}
+        <li class="{% if s.is_online %}is-add{% else %}is-del{% endif %}">
+          <a href="{% url 'agent:screen' s.slug %}">{{ s.name }}</a>
+          <small>{% if s.is_online %}Online{% elif s.last_seen %}Offline since {{ s.last_seen|timesince }}{% else %}Never connected{% endif %}{% if s.now_playing %} · {{ s.now_playing }}{% endif %}</small>
+        </li>
+      {% endfor %}
+      </ul>
+    </section>{% endif %}
+    <section class="fd-group">
+      <h2><span aria-hidden="true">🕘</span> My recent changes</h2>
+      {% get_admin_log 8 as admin_log for_user user %}
+      {% if not admin_log %}<p class="fd-muted">Nothing yet.</p>{% else %}
+      <ul class="fd-log">
+      {% for entry in admin_log %}
+        <li class="{% if entry.is_addition %}is-add{% elif entry.is_deletion %}is-del{% else %}is-change{% endif %}">
+          {% if entry.is_deletion or not entry.get_admin_url %}{{ entry.object_repr }}{% else %}<a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>{% endif %}
+          <small>{% if entry.is_addition %}Added{% elif entry.is_deletion %}Deleted{% else %}Changed{% endif %} · {{ entry.content_type.name|capfirst }} · {{ entry.action_time|timesince }} ago</small>
+        </li>
+      {% endfor %}
+      </ul>{% endif %}
+    </section>
+    <section class="fd-group">
+      <h2><span aria-hidden="true">❓</span> Help</h2>
+      <p class="fd-muted">Step-by-step instructions for every section are in the Admin Guide (docs/ADMIN-GUIDE.md).</p>
+    </section>
+  </aside>
+</div>
+
+</div>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

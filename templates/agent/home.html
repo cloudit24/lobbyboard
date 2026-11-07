@@ -1,0 +1,29 @@
+{% extends "desk/base.html" %}
+
+
+{% block content %}
+<div>
+  <div class="fd-hello">
+    <div>
+      <h1>📺 TVs</h1>
+      <p>Choose a TV to control.</p>
+    </div>
+    <div class="fd-quick"><a class="fd-btn fd-btn--primary" href="{% url 'agent:upload' %}">⬆ Upload files</a></div>
+  </div>
+
+  <section class="fd-group">
+    <h2><span aria-hidden="true">📺</span> Your screens</h2>
+    {% if screens %}<ul>
+    {% for s in screens %}
+      <li><a class="fd-item" href="{% url 'agent:screen' s.slug %}">
+        <span class="fd-item-icon" aria-hidden="true">📺</span>
+        <span class="fd-item-text"><b>{{ s.name }}</b><small>{% if s.now_playing %}{{ s.now_playing }}{% else %}{{ s.notes }}{% endif %}</small></span>
+        {% if s.is_online %}<span class="fd-badge">● Online</span>{% else %}<span class="fd-badge is-alert">Offline</span>{% endif %}
+      </a></li>
+    {% endfor %}
+    </ul>{% else %}
+    <p class="fd-muted">No screen is assigned to you yet. Ask an admin to add you to a screen.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

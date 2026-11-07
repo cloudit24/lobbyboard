@@ -1,0 +1,286 @@
+/* =====================================================================
+   ADMIN DESIGN STANDARD  -  v1
+   One look for every admin page (website and members portal).
+   Rules and how to use them: docs/ADMIN-DESIGN.md
+
+   Built on Django's own admin, so every screen Django adds later picks
+   the look up automatically: soft page background, white cards with a
+   thin border and rounded corners, small grey uppercase section titles,
+   pill buttons, one blue for actions, red only for alerts/deletes.
+   ===================================================================== */
+
+/* ---------- 1. Design tokens (colours, radius, spacing) ---------- */
+:root, html[data-theme="light"] {
+  --primary: #0b5273; --secondary: #084560; --accent: #c9a84c; --primary-fg: #fff;
+  --header-bg: #084560; --header-color: #fff; --header-branding-color: #fff; --header-link-color: #fff;
+  --breadcrumbs-bg: transparent; --breadcrumbs-fg: #5b6b75; --breadcrumbs-link-fg: #0b5273;
+  --link-fg: #0b5273; --link-hover-color: #06344a; --link-selected-fg: #06344a;
+  --button-bg: #0b5273; --button-hover-bg: #084560; --default-button-bg: #0b5273; --default-button-hover-bg: #084560;
+  --object-tools-bg: #fff; --object-tools-fg: #0b5273; --object-tools-hover-bg: #f3f7fa;
+  --darkened-bg: #f3f7fa; --selected-bg: #e8f1f6; --selected-row: #fff8e1;
+  --hairline-color: #e3e9ee; --border-color: #cfd8df;
+
+  --fd-page: #f4f7f9;     /* page background */
+  --fd-card: #fff;        /* cards */
+  --fd-soft: #f3f7fa;     /* icon tiles, hover rows, table heads */
+  --fd-line: #e3e9ee;     /* card borders */
+  --fd-muted: #5b6b75;    /* secondary text, section titles */
+  --fd-alert: #c62828;    /* unread / errors / delete */
+  --fd-ok: #2e7d32;
+  --fd-focus: rgba(11, 82, 115, 0.22);
+  --fd-radius: 10px;
+  --fd-radius-sm: 8px;
+  --fd-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #3d8fb8; --secondary: #0f2a38;
+    --header-bg: #0f2a38; --breadcrumbs-fg: #9aa7b0; --breadcrumbs-link-fg: #7cc0e3;
+    --link-fg: #7cc0e3; --link-hover-color: #a9d8f0; --link-selected-fg: #a9d8f0;
+    --button-bg: #2f7ca3; --button-hover-bg: #3d8fb8; --default-button-bg: #2f7ca3; --default-button-hover-bg: #3d8fb8;
+    --object-tools-bg: #1e2226; --object-tools-fg: #7cc0e3; --object-tools-hover-bg: #262b30;
+    --darkened-bg: #1a1e22; --selected-bg: #20303a; --selected-row: #2c2a1c;
+    --hairline-color: #2e343a; --border-color: #3a4148;
+    --fd-page: #121517; --fd-card: #1e2226; --fd-soft: #171a1d; --fd-line: #2e343a;
+    --fd-muted: #9aa7b0; --fd-alert: #ff6b6b; --fd-ok: #66bb6a; --fd-focus: rgba(124, 192, 227, 0.25);
+    --fd-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+}
+html[data-theme="dark"] {
+  --primary: #3d8fb8; --secondary: #0f2a38;
+  --header-bg: #0f2a38; --breadcrumbs-fg: #9aa7b0; --breadcrumbs-link-fg: #7cc0e3;
+  --link-fg: #7cc0e3; --link-hover-color: #a9d8f0; --link-selected-fg: #a9d8f0;
+  --button-bg: #2f7ca3; --button-hover-bg: #3d8fb8; --default-button-bg: #2f7ca3; --default-button-hover-bg: #3d8fb8;
+  --object-tools-bg: #1e2226; --object-tools-fg: #7cc0e3; --object-tools-hover-bg: #262b30;
+  --darkened-bg: #1a1e22; --selected-bg: #20303a; --selected-row: #2c2a1c;
+  --hairline-color: #2e343a; --border-color: #3a4148;
+  --fd-page: #121517; --fd-card: #1e2226; --fd-soft: #171a1d; --fd-line: #2e343a;
+  --fd-muted: #9aa7b0; --fd-alert: #ff6b6b; --fd-ok: #66bb6a; --fd-focus: rgba(124, 192, 227, 0.25);
+  --fd-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- 2. Page frame: header, shortcuts bar, breadcrumbs ---------- */
+body { background: var(--fd-page); }
+#container { background: var(--fd-page); }
+#header { background: var(--header-bg); padding: 12px 32px; }
+#site-name a:link, #site-name a:visited { color: #fff; font-weight: 700; letter-spacing: 0.2px; }
+#site-name small { font-weight: 400; opacity: 0.7; font-size: 13px; margin-inline-start: 8px; }
+#user-tools a { border-bottom: 0; }
+
+#fd-bar { background: #0b5273; border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 0 32px; display: flex; flex-wrap: wrap; gap: 2px; }
+#fd-bar a { color: #e6f1f7; padding: 9px 12px; font-size: 13px; text-decoration: none; border-bottom: 2px solid transparent; }
+#fd-bar a:hover, #fd-bar a.is-current { color: #fff; border-bottom-color: var(--accent); }
+#fd-bar .fd-bar-site { margin-inline-start: auto; }
+html[data-theme="dark"] #fd-bar { background: #13384b; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #fd-bar { background: #13384b; } }
+
+div.breadcrumbs { background: transparent; color: var(--breadcrumbs-fg); padding: 16px 32px 0; font-size: 12.5px; border: 0; }
+div.breadcrumbs a { color: var(--breadcrumbs-link-fg); }
+
+/* ---------- 3. Content area and titles ---------- */
+.main > .content, #content-start { background: transparent; }
+#content { padding: 12px 32px 40px; max-width: 1400px; }
+#content > h1 { font-size: 24px; font-weight: 700; margin: 4px 0 4px; color: var(--body-fg); }
+#content > h2 { font-size: 14px; font-weight: 400; color: var(--fd-muted); margin: 0 0 16px; }
+#content > h1 + #content-main, #content > h1 + .object-tools { margin-top: 12px; }
+.fd-muted { color: var(--fd-muted); font-size: 13px; }
+
+/* ---------- 4. Cards and section titles ---------- */
+.module, fieldset.module, .inline-group, #changelist-filter, .fd-group, .fd-card {
+  background: var(--fd-card); border: 1px solid var(--fd-line); border-radius: var(--fd-radius);
+}
+.module { overflow: hidden; margin-bottom: 16px; }
+fieldset.module { padding: 6px 0 4px; margin-bottom: 16px; }
+body .module h2, body .module caption, body .inline-group h2, body fieldset .fieldset-heading, .fd-group h2 {
+  background: none; color: var(--fd-muted); font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.6px; padding: 12px 16px 8px; margin: 0; text-align: start;
+  border: 0; box-shadow: none;
+}
+body .module caption { caption-side: top; }
+fieldset .description, .module .description { color: var(--fd-muted); font-size: 13px; padding: 0 16px 8px; margin: 0; }
+.fd-group { padding: 14px; margin-bottom: 16px; }
+.fd-group h2 { padding: 0 4px; margin: 0 0 10px; }
+
+/* ---------- 5. Buttons ---------- */
+.button, input[type=submit], input[type=button], .submit-row input, a.button, button.button {
+  border-radius: 20px; padding: 9px 18px; font-weight: 600; font-size: 13px; border: 1px solid transparent; height: auto;
+}
+.button.default, input[type=submit].default, .submit-row input.default { background: var(--button-bg); text-transform: none; }
+.submit-row input, .submit-row a { margin-block: 2px; }
+.object-tools { margin-top: -38px; }
+.object-tools li { margin-inline-start: 8px; }
+.object-tools a:link, .object-tools a:visited {
+  background: var(--object-tools-bg); color: var(--object-tools-fg); border: 1px solid var(--fd-line);
+  border-radius: 20px; padding: 8px 16px; font-size: 12.5px; font-weight: 600; text-transform: none; letter-spacing: 0;
+}
+.object-tools a:hover { background: var(--object-tools-hover-bg); border-color: var(--link-fg); }
+.object-tools a.addlink:link, .object-tools a.addlink:visited { background: var(--button-bg); color: #fff; border-color: var(--button-bg); padding-inline-start: 30px; background-position: 12px center; }
+.object-tools a.addlink:hover { background-color: var(--button-hover-bg); }
+.fd-btn { display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 13px; border: 1px solid var(--fd-line); background: var(--fd-card); }
+.fd-btn:hover { border-color: var(--link-fg); text-decoration: none; }
+a.fd-btn--primary:link, a.fd-btn--primary:visited { background: var(--button-bg); border-color: var(--button-bg); color: #fff; }
+a.fd-btn--primary:hover { background: var(--button-hover-bg); color: #fff; }
+
+/* ---------- 6. Forms ---------- */
+.form-row { padding: 12px 16px; border-bottom: 1px solid var(--fd-line); }
+fieldset .form-row:last-child { border-bottom: 0; }
+form .aligned label, .aligned label { color: var(--body-fg); font-weight: 600; }
+.help, p.help, form .aligned p.help, form .aligned div.help { color: var(--fd-muted); font-size: 12.5px; }
+input[type=text], input[type=url], input[type=email], input[type=number], input[type=password], input[type=tel],
+input[type=search], textarea, select, .vTextField, .vDateField, .vTimeField, .vURLField {
+  border: 1px solid var(--border-color); border-radius: var(--fd-radius-sm); padding: 7px 10px; background: var(--fd-card);
+}
+select { padding: 6px 8px; }
+/* Arabic fields type right-to-left (page HTML code boxes stay left-to-right). */
+input[name$="_ar"], textarea[name$="_ar"] { direction: rtl; text-align: start; }
+input:focus, textarea:focus, select:focus { border-color: var(--link-fg); outline: 0; box-shadow: 0 0 0 3px var(--fd-focus); }
+.errornote { border-radius: var(--fd-radius-sm); border: 1px solid var(--fd-alert); background: var(--message-error-bg); }
+ul.errorlist li { border-radius: 6px; }
+.submit-row {
+  background: var(--fd-card); border: 1px solid var(--fd-line); border-radius: var(--fd-radius);
+  padding: 12px 16px; margin: 16px 0 0; position: sticky; bottom: 12px; z-index: 5; box-shadow: var(--fd-shadow);
+  align-items: center;
+}
+.submit-row a.deletelink { border-radius: 20px; padding: 9px 18px; height: auto; font-weight: 600; background: transparent; color: var(--fd-alert); border: 1px solid var(--fd-alert); }
+.submit-row a.deletelink:hover { background: var(--fd-alert); color: #fff; }
+.submit-row a.closelink { border-radius: 20px; height: auto; padding: 9px 18px; }
+details.module summary, .collapse summary { cursor: pointer; }
+.inline-group .tabular th, .inline-group .tabular td { padding: 8px 10px; }
+.selector .selector-available, .selector .selector-chosen { border-radius: var(--fd-radius-sm); }
+/* Month tick boxes (Fish seasons) and other checkbox lists in a tidy grid. */
+form .aligned ul#id_season_months, form .aligned ul#id_closed_months,
+form .aligned div#id_season_months, form .aligned div#id_closed_months { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 4px 12px; margin-inline-start: 0; }
+
+/* ---------- 7. Lists (change lists) ---------- */
+#changelist { gap: 16px; }
+#changelist.module { background: transparent; border: 0; border-radius: 0; overflow: visible; }
+#changelist .changelist-form-container { background: var(--fd-card); border: 1px solid var(--fd-line); border-radius: var(--fd-radius); overflow: hidden; }
+#changelist #toolbar { background: transparent; border-bottom: 1px solid var(--fd-line); padding: 12px 16px; margin: 0; }
+#changelist #toolbar form input[type=text], #changelist-search input[type=text] { border-radius: 20px; padding: 7px 14px; min-width: 260px; }
+#changelist #toolbar form input[type=submit] { border-radius: 20px; padding: 7px 16px; }
+#changelist .actions { background: var(--fd-soft); border-bottom: 1px solid var(--fd-line); padding: 10px 16px; margin: 0; border-radius: 0; color: var(--fd-muted); }
+#changelist .actions select { border-radius: 20px; }
+#changelist table thead th { background: var(--fd-soft); color: var(--fd-muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--fd-line); padding: 10px 12px; }
+#changelist table thead th a:link, #changelist table thead th a:visited { color: var(--fd-muted); }
+#changelist table tbody td, #changelist table tbody th { padding: 11px 12px; border-bottom: 1px solid var(--fd-line); vertical-align: middle; font-size: 13.5px; }
+#changelist table tbody tr:hover td, #changelist table tbody tr:hover th { background: var(--fd-soft); }
+#changelist table tbody tr.selected td, #changelist table tbody tr.selected th { background: var(--selected-row); }
+#changelist table tbody th a { font-weight: 600; }
+#changelist .paginator { background: transparent; border-top: 0; padding: 12px 16px; color: var(--fd-muted); }
+#changelist .paginator a:link, #changelist .paginator a:visited { border-radius: 14px; background: var(--fd-soft); color: var(--link-fg); padding: 4px 10px; }
+#changelist .paginator a.showall { background: none; }
+#changelist .paginator .this-page { border-radius: 14px; background: var(--button-bg); color: #fff; padding: 4px 10px; }
+#changelist .xfull { padding: 12px 16px; }
+p.paginator, .changelist-footer { border-radius: 0 0 var(--fd-radius) var(--fd-radius); }
+/* Filters sidebar */
+#changelist-filter { padding: 6px 0 10px; overflow: hidden; }
+#changelist-filter h2 { background: none; color: var(--body-fg); font-size: 14px; font-weight: 700; text-transform: none; letter-spacing: 0; padding: 10px 16px 4px; }
+#changelist-filter details summary, #changelist-filter h3 { color: var(--fd-muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; padding: 10px 16px 4px; margin: 0; }
+#changelist-filter ul { padding: 0 8px 6px; border: 0; margin: 0; }
+#changelist-filter li { border-radius: 6px; padding: 3px 0; }
+#changelist-filter li a { display: block; padding: 5px 8px; border-radius: 6px; color: var(--body-fg); }
+#changelist-filter li a:hover { background: var(--fd-soft); color: var(--link-fg); text-decoration: none; }
+#changelist-filter li.selected { border: 0; padding-inline-start: 0; margin-inline-start: 0; }
+#changelist-filter li.selected a { background: var(--selected-bg); color: var(--link-fg); font-weight: 600; }
+#changelist-filter #changelist-filter-extra-actions { padding: 6px 16px; }
+.changelist-filter-clear a { color: var(--fd-alert) !important; }
+/* Date drill-down (year / month) */
+#changelist .xfull ul.toplinks, .toplinks { padding: 0; }
+.toplinks li a { border-radius: 14px; }
+/* Yes/no icons stay; editable columns inside rows stay compact */
+#changelist table input[type=text], #changelist table input[type=number] { padding: 4px 8px; }
+
+/* ---------- 8. Messages ---------- */
+ul.messagelist { padding: 12px 32px 0; }
+ul.messagelist li { border-radius: var(--fd-radius-sm); border: 1px solid var(--fd-line); border-inline-start: 4px solid var(--fd-ok); margin: 0 0 8px; padding: 10px 14px 10px 44px; background-position: 14px center; font-size: 13.5px; }
+ul.messagelist li.warning { border-inline-start-color: var(--accent); }
+ul.messagelist li.error { border-inline-start-color: var(--fd-alert); }
+
+/* ---------- 9. Login page ---------- */
+body.login { background: var(--fd-page); }
+body.login #container {
+  background: var(--fd-card); border: 1px solid var(--fd-line); border-radius: 14px;
+  box-shadow: var(--fd-shadow); overflow: hidden; margin: 8vh auto; width: 400px; max-width: calc(100% - 32px);
+}
+body.login #header { padding: 18px 24px; }
+body.login #content { padding: 20px 24px 24px; }
+body.login .form-row { border: 0; padding: 6px 0; }
+body.login .form-row label { display: block; font-weight: 600; margin-bottom: 4px; padding: 0; }
+body.login .form-row #id_username, body.login .form-row #id_password { width: 100%; padding: 10px 12px; box-sizing: border-box; }
+body.login .submit-row { position: static; box-shadow: none; border: 0; padding: 12px 0 0; background: none; }
+body.login .submit-row input { width: 100%; padding: 11px; }
+body.login .password-reset-link { text-align: center; }
+
+/* ---------- 10. History, delete confirmation, simple pages ---------- */
+#change-history, table#change-history { width: 100%; }
+.delete-confirmation #content ul, .delete-confirmation-summary { background: var(--fd-card); border: 1px solid var(--fd-line); border-radius: var(--fd-radius); padding: 12px 16px 12px 36px; }
+.delete-confirmation form input[type=submit] { background: var(--fd-alert); }
+.delete-confirmation form .button.cancel-link { border-radius: 20px; padding: 9px 18px; height: auto; line-height: normal; }
+table { border-color: var(--fd-line); }
+#content-main > table, #content-main > .module > table { width: 100%; }
+
+/* ---------- 11. Dashboard and report building blocks ---------- */
+.fd-dashboard #content { padding: 24px 32px 40px; width: auto; }
+.fd-dashboard #content-main { float: none; width: auto; }
+.fd-dash h1 { font-size: 24px; margin: 0 0 4px; font-weight: 700; }
+.fd-dash p { margin: 0; }
+.fd-hello { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.fd-hello p { color: var(--fd-muted); }
+.fd-quick { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.fd-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.fd-stat { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--fd-card); border: 1px solid var(--fd-line); border-radius: var(--fd-radius); border-inline-start: 4px solid var(--primary); }
+a.fd-stat:hover { text-decoration: none; box-shadow: var(--fd-shadow); }
+.fd-stat b { font-size: 26px; line-height: 1.1; color: var(--body-fg); }
+.fd-stat b.is-small { font-size: 17px; line-height: 1.6; }
+.fd-stat span { color: var(--fd-muted); font-size: 12.5px; }
+.fd-stat.is-alert { border-inline-start-color: var(--fd-alert); }
+.fd-stat.is-alert b { color: var(--fd-alert); }
+
+.fd-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.fd-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; align-items: start; }
+.fd-groups .fd-group { margin: 0; }
+.fd-group ul { list-style: none; margin: 0; padding: 0; }
+.fd-group li { display: flex; align-items: stretch; gap: 6px; padding: 0; list-style: none; }
+.fd-group li + li { margin-top: 4px; }
+.fd-item { flex: 1; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--fd-radius-sm); min-width: 0; }
+.fd-item:hover { background: var(--fd-soft); text-decoration: none; }
+.fd-item-icon { flex: none; width: 36px; height: 36px; display: grid; place-items: center; font-size: 18px; border-radius: var(--fd-radius-sm); background: var(--fd-soft); }
+.fd-item-text { display: flex; flex-direction: column; min-width: 0; }
+.fd-item-text b { color: var(--body-fg); font-size: 14px; }
+.fd-item:hover .fd-item-text b { color: var(--link-fg); }
+.fd-item-text small { color: var(--fd-muted); font-size: 12px; line-height: 1.4; margin-top: 2px; }
+.fd-badge { margin-inline-start: auto; flex: none; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 12px; background: var(--fd-soft); color: var(--fd-muted); }
+.fd-badge.is-alert { background: var(--fd-alert); color: #fff; }
+.fd-add { flex: none; width: 36px; display: grid; place-items: center; border-radius: var(--fd-radius-sm); font-size: 16px; color: var(--fd-muted); }
+.fd-add:hover { background: var(--fd-soft); color: var(--link-fg); text-decoration: none; }
+
+.fd-log { list-style: none; margin: 0; padding: 0; }
+.fd-log li { display: block; padding: 8px 4px 8px 12px; border-inline-start: 3px solid var(--fd-line); margin-bottom: 6px; list-style: none; }
+.fd-log li.is-add { border-inline-start-color: var(--fd-ok); }
+.fd-log li.is-del { border-inline-start-color: var(--fd-alert); }
+.fd-log li.is-change { border-inline-start-color: var(--accent); }
+.fd-log small { display: block; color: var(--fd-muted); font-size: 11.5px; margin-top: 2px; }
+
+/* Bar rows for reports (Analytics) */
+.fd-bars { width: 100%; border-collapse: collapse; }
+.fd-bars td { padding: 7px 4px; border-bottom: 1px solid var(--fd-line); font-size: 13px; vertical-align: middle; }
+.fd-bars tr:last-child td { border-bottom: 0; }
+.fd-bars .fd-bars-label { width: 38%; overflow-wrap: anywhere; }
+.fd-bars .fd-bars-n { width: 60px; text-align: end; font-weight: 700; }
+.fd-bar-fill { height: 10px; border-radius: 5px; background: var(--primary); min-width: 2px; }
+.fd-bar-fill.is-accent { background: var(--accent); }
+
+/* ---------- 12. Small screens ---------- */
+@media (max-width: 1024px) {
+  .fd-layout { grid-template-columns: 1fr; }
+  .fd-groups { grid-template-columns: 1fr; }
+}
+@media (max-width: 767px) {
+  #header, div.breadcrumbs, #fd-bar { padding-inline: 16px; }
+  #content, .fd-dashboard #content { padding: 12px 16px 32px; }
+  ul.messagelist { padding-inline: 16px; }
+  #fd-bar .fd-bar-site { margin-inline-start: 0; }
+  .object-tools { margin-top: 0; }
+  #changelist #toolbar form input[type=text] { min-width: 0; width: 100%; }
+}

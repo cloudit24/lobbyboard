@@ -1,0 +1,20 @@
+{% load static %}
+<div class="card contact-card" data-name="contact">
+  <div class="p-title"><i data-icon="chat"></i><span id="contact-title">تواصل معنا · Contact Us</span><span class="svc-dots" id="svc-dots"></span></div>
+  <div class="svc-slide" id="svc-slide"></div>
+  <div class="contact-layout" id="contact-layout">
+    {% if qr_svg %}<div class="qr-box">
+      <div id="qr-code">{{ qr_svg|safe }}<span class="qr-scan"></span></div>
+      <div class="qr-label">{{ config.qrLabel }}</div>
+    </div>{% endif %}
+    <div class="contact-items">
+      {% with c=config.contact %}
+      {% if c.phone %}<div class="c-item"><i data-icon="phone"></i><span class="c-text">{{ c.phone }}</span></div>{% endif %}
+      {% if c.mobile %}<div class="c-item"><i data-icon="mobile"></i><span class="c-text">{{ c.mobile }}</span></div>{% endif %}
+      {% if c.email %}<div class="c-item"><i data-icon="mail"></i><span class="c-text">{{ c.email }}</span></div>{% endif %}
+      {% if c.website %}<div class="c-item"><i data-icon="globe"></i><span class="c-text">{{ c.website }}</span></div>{% endif %}
+      {% if c.address %}<div class="c-item"><i data-icon="pin"></i><span class="c-text">{{ c.address }}</span></div>{% endif %}
+      {% endwith %}
+    </div>
+  </div>
+</div>

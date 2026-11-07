@@ -1,0 +1,72 @@
+{% extends "desk/base.html" %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Hello{% if user.first_name %}, {{ user.first_name }}{% endif %}</h1>
+    <p>{% now "l j F Y" %}</p>
+  </div>
+  <div class="actions">
+    {% if can.visitors %}<a class="btn btn-primary" href="{% url 'agent:visitors' %}">＋ Check in a visitor</a>{% endif %}
+    {% if can.enquiries %}<a class="btn" href="{% url 'agent:enquiry_new' %}">＋ Log a phone / walk-in enquiry</a>{% endif %}
+  </div>
+</div>
+
+{% if sec %}
+<div class="tiles">
+  <a class="tile{% if sec.unassigned %} is-alert{% endif %}" href="{% url 'agent:enquiries' %}?tab=unassigned"><b>{{ sec.unassigned }}</b><span>Enquiries nobody has taken</span></a>
+  <a class="tile{% if sec.old %} is-alert{% endif %}" href="{% url 'agent:enquiries' %}?tab=open&status=new"><b>{{ sec.old }}</b><span>New for over 24 hours</span></a>
+  <a class="tile" href="{% url 'agent:enquiries' %}?tab=open"><b>{{ sec.open }}</b><span>Open enquiries</span></a>
+  <a class="tile" href="{% url 'agent:visitors' %}"><b>{{ inside|length }}</b><span>Visitors in the building</span></a>
+  <a class="tile" href="{% url 'agent:reports' %}"><b>{{ visits_today }}</b><span>Visits today</span></a>
+</div>
+{% if sec.mail_error %}<div class="d-msg d-msg--error" style="margin-bottom:16px">The enquiries mailbox can't be reached: {{ sec.mail_error }}. An admin can fix it in Admin → Mail settings.</div>{% endif %}
+{% endif %}
+
+<div class="grid2">
+  {% if can.enquiries or can.secretary %}
+  <section class="card">
+    <h2>📨 My enquiries ({{ my_open|length }})</h2>
+    {% for e in my_open %}
+      <a class="row-link" href="{% url 'agent:enquiry' e.pk %}"><span class="badge st-{{ e.status }}">{{ e.get_status_display }}</span>
+        <span style="flex:1"><b>{{ e.ref }}</b> {{ e.subject|truncatechars:60 }}<br><small>{{ e.customer_name|default:e.customer_email }} · {{ e.queue|default:"No topic" }} · {{ e.updated_at|timesince }} ago</small></span></a>
+    {% empty %}<p class="empty">Nothing waiting for you. 👍</p>{% endfor %}
+    {% if unassigned %}
+    <h3>Waiting for someone to take ({{ unassigned|length }})</h3>
+    {% for e in unassigned %}
+      <a class="row-link" href="{% url 'agent:enquiry' e.pk %}"><span class="badge st-new">New</span>
+        <span style="flex:1"><b>{{ e.ref }}</b> {{ e.subject|truncatechars:60 }}<br><small>{{ e.queue|default:"No topic" }} · {{ e.created_at|timesince }} ago</small></span></a>
+    {% endfor %}{% endif %}
+  </section>
+  {% endif %}
+
+  {% if can.visitors or can.secretary %}
+  <section class="card">
+    <h2>🚪 In the building now ({{ inside|length }})</h2>
+    {% for v in inside %}
+      <div class="row-link"><span style="flex:1"><b>{{ v.name }}</b>{% if v.company %} · {{ v.company }}{% endif %}<br>
+        <small>{{ v.purpose|default:"" }}{% if v.meeting_with %} · to see {{ v.meeting_with }}{% endif %} · since {{ v.checked_in_at|time:"H:i" }}</small></span>
+        {% if can.visitors %}<form class="inline" method="post" action="{% url 'agent:visitor_out' v.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{% url 'agent:home' %}"><button class="btn btn-small">Check out</button></form>{% endif %}
+      </div>
+    {% empty %}<p class="empty">Nobody checked in right now.</p>{% endfor %}
+  </section>
+  {% endif %}
+
+  {% if screens %}
+  <section class="card">
+    <h2>📺 TVs</h2>
+    {% for s in screens %}
+      <a class="row-link" href="{% url 'agent:screen' s.slug %}">
+        {% if s.is_online %}<span class="badge ok">● Online</span>{% else %}<span class="badge alert">Offline</span>{% endif %}
+        <span style="flex:1"><b>{{ s.name }}</b><br><small>{{ s.now_playing|default:"-" }}</small></span></a>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if sec.per_agent %}
+  <section class="card">
+    <h2>👥 Open enquiries per agent</h2>
+    <table class="table">{% for p in sec.per_agent %}<tr><td>{% firstof p.profile.display_name p.first_name p.username %}</td><td style="text-align:right"><b>{{ p.n }}</b></td></tr>{% endfor %}</table>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

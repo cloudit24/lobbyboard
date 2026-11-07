@@ -1,0 +1,4 @@
+{% load static %}
+<div class="card logo-card" data-name="logo">
+  {% if config.logoUrl %}<img src="{{ config.logoUrl }}" alt="{{ config.orgNameEn }}">{% else %}<div class="logo-big">{{ config.logoInitials }}</div>{% endif %}
+</div>
