@@ -1,4 +1,4 @@
-/* FrontDesk - the reception TV screen.
+/* LobbyBoard - the reception TV screen.
    Everything it shows comes from the server: settings (in the page), weather,
    prayer times and news (/api/...), and what to play (/api/screens/<slug>/state/,
    asked every few seconds). If the server is briefly unreachable the screen

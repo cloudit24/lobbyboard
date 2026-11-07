@@ -1,4 +1,4 @@
-# FrontDesk - `docker compose up -d`, then open http://<this-computer>:8080/
+# LobbyBoard - `docker compose up -d`, then open http://<this-computer>:8080/
 #   web    the app (Django + Gunicorn), database and uploads live in the `data` volume
 #   proxy  nginx: serves uploaded videos/music/photos fast, forwards the rest to `web`
 name: lobbyboard

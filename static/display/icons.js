@@ -1,4 +1,4 @@
-/* FrontDesk TV icons: one small line-icon set (24x24, drawn with currentColor)
+/* LobbyBoard TV icons: one small line-icon set (24x24, drawn with currentColor)
    plus animated weather pictures. Used by screen.js; in the page, any
    <i data-icon="name"></i> is filled in when the screen starts. */
 window.TV_ICONS = (() => {

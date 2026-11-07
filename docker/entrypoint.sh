@@ -1,5 +1,5 @@
 #!/bin/sh
-# Starts FrontDesk: update the database, make the first admin if asked,
+# Starts LobbyBoard: update the database, make the first admin if asked,
 # clean old logs once a day, then serve.
 set -e
 

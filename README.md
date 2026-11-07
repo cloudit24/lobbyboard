@@ -1,4 +1,4 @@
-# FrontDesk
+# LobbyBoard
 
 A self-hosted front-desk system: a **desk dashboard** for the people at
 reception and customer care, and a **reception TV** they control.

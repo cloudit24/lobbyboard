@@ -1,4 +1,4 @@
-/* FrontDesk - reception TV screen, designed at 1920x1080 and scaled to fit any TV.
+/* LobbyBoard - reception TV screen, designed at 1920x1080 and scaled to fit any TV.
    Look: dark glass cards over a slow aurora whose colours follow the time of day.
    Motion uses only transform/opacity where possible, so cheap TV sticks keep up.
    Add ?motion=low to the screen URL (or set "reduce motion" on the device) to calm it. */

@@ -1,4 +1,4 @@
-"""FrontDesk settings. Everything that differs per install comes from
+"""LobbyBoard settings. Everything that differs per install comes from
 environment variables (see .env.example); nothing about any organisation
 lives in the code - names, logo, contact details and so on are entered in
 the admin panel.
@@ -130,7 +130,7 @@ LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-APP_NAME = os.environ.get("APP_NAME", "FrontDesk")
+APP_NAME = os.environ.get("APP_NAME", "LobbyBoard")
 
 # Behind nginx / a tunnel: trust the forwarded scheme so CSRF works on https.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

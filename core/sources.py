@@ -21,7 +21,7 @@ from django.utils import timezone
 
 log = logging.getLogger(__name__)
 TIMEOUT = 8
-UA = {"User-Agent": "FrontDesk/1.0 (+https://github.com/)"}
+UA = {"User-Agent": "LobbyBoard/1.0 (+https://github.com/)"}
 
 
 def _get(url, params=None):
