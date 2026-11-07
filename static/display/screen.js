@@ -9,7 +9,9 @@
 const CONFIG = JSON.parse(document.getElementById('tv-config').textContent);
 const TV = window.TV;
 const ICON = window.TV_ICONS;
-const $ = id => document.getElementById(id);
+// A panel the admin left off the screen gives a spare, unseen element, so the rest keeps running.
+const $ = id => document.getElementById(id) || document.createElement(/vid|video|music/.test(id) ? 'video' : /flag|fx|particles/.test(id) ? 'canvas' : 'div');
+const q = sel => document.querySelector(sel) || document.createElement('div');
 const pad = n => String(n).padStart(2, '0');
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -232,9 +234,9 @@ function flipCalendar() {
 
 /* The prayer panel and the Arabic headlines under it line up with the About us panel beside them. */
 function matchPrayerHeight() {
-  const pr = document.querySelector('.prayer-bottom'), news = document.querySelector('.news-card'),
-        pk = document.querySelector('.picker-card');
-  if (!pr || !news || document.querySelector('.grid-layout')) return;   // the designer's grid sizes panels itself
+  const pr = q('.prayer-bottom'), news = q('.news-card'),
+        pk = q('.picker-card');
+  if (!pr || !news || q('.grid-layout')) return;   // the designer's grid sizes panels itself
   const gap = parseFloat(getComputedStyle(pr.parentElement).rowGap) || 0;
   pr.style.height = (news.offsetHeight - (pk && pk.style.display !== 'none' ? pk.offsetHeight + gap : 0)) + 'px';
 }
@@ -248,7 +250,7 @@ async function fetchArabicNews() {
     const d = await getJSON(TV.newsArUrl);
     if (d.items?.length) { picks = d.items.map(i => i.title); $('picker-src').textContent = d.label || ''; }
   } catch (e) { /* keep last good */ }
-  const card = document.querySelector('.picker-card');
+  const card = q('.picker-card');
   card.style.display = picks.length ? '' : 'none';
   matchPrayerHeight();
   if (!picks.length) return;
@@ -454,7 +456,7 @@ function renderSky() {
     $(id).classList.toggle('down', !up);
   }
   $('sun-done').style.strokeDasharray = `${up ? f * 100 : 0} 100`;
-  document.querySelector('.sky-card').classList.toggle('night', !up);
+  q('.sky-card').classList.toggle('night', !up);
 
   const moon = moonInfo(now);
   $('moon-row').innerHTML = `${ICON.moon(moon.age, SYN, 52)}<div style="flex:1">
@@ -561,7 +563,7 @@ function startAbout() {
   if (key === aboutKey) return;
   aboutKey = key; clearTimeout(aboutTimer);
   aboutSlides = a ? aboutDeck(a) : [];
-  const card = document.querySelector('.news-card');
+  const card = q('.news-card');
   card.classList.toggle('about-on', aboutSlides.length > 0);
   card.classList.remove('hidden');
   $('news-title').textContent = aboutSlides.length ? 'عن الجمعية · About us' : 'آخر الأخبار · Latest News';
@@ -590,7 +592,7 @@ function startServices() {
   if (!svcTimer) svcTimer = setInterval(() => { svcIdx = svcIdx + 1 >= n ? -1 : svcIdx + 1; showService(); }, SERVICE_SECONDS * 1000);
 }
 function showService() {
-  const s = site.services?.[svcIdx], card = document.querySelector('.contact-card');
+  const s = site.services?.[svcIdx], card = q('.contact-card');
   card.classList.toggle('svc-on', !!s);
   [...$('svc-dots').children].forEach((d, i) => d.classList.toggle('on', i === svcIdx + 1));
   $('contact-title').textContent = s ? 'خدماتنا · Our services' : 'تواصل معنا · Contact Us';
@@ -788,7 +790,7 @@ function effects(kind) {
   const c = $('fx'), g = c.getContext('2d');
   g.clearRect(0, 0, c.width, c.height);
   if (kind === 'none') return;
-  const box = document.querySelector('.media-card');
+  const box = q('.media-card');
   c.width = box.offsetWidth; c.height = box.offsetHeight;
   if (kind === 'eid') {
     for (let i = 0; i < 60; i++) fx.parts.push({ x: Math.random() * c.width, y: Math.random() * c.height * 0.6, r: Math.random() * 1.6 + 0.4, p: Math.random() * 6 });

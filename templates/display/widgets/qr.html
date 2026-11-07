@@ -1,0 +1,4 @@
+<div class="card w-card w-qr" data-name="qr">
+  {% if w.data.svg %}<div class="w-qr-code">{{ w.data.svg|safe }}</div>{% else %}<div class="w-empty">Add a link in the designer</div>{% endif %}
+  {% if w.o.label %}<div class="w-qr-label">{{ w.o.label }}</div>{% endif %}
+</div>

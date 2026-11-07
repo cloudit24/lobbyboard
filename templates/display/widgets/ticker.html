@@ -1,0 +1,4 @@
+<div class="card w-card w-ticker" data-name="ticker">
+  <div class="w-ticker-track" style="animation-duration:{{ w.o.speed }}s">{% for m in w.data.messages %}<span>{{ m }}</span>{% endfor %}{% for m in w.data.messages %}<span aria-hidden="true">{{ m }}</span>{% endfor %}</div>
+  {% if not w.data.messages %}<div class="w-empty">Add messages in Admin → Ticker messages</div>{% endif %}
+</div>

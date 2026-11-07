@@ -1,0 +1,3 @@
+<div class="card w-card w-web" data-name="web">
+  {% if w.o.url %}<iframe src="{{ w.o.url }}" title="Web page" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" style="--z:{{ w.o.zoom }}"></iframe>{% else %}<div class="w-empty">Add an address in the designer</div>{% endif %}
+</div>

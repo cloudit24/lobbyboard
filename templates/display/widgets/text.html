@@ -1,0 +1,4 @@
+<div class="card w-card w-text" data-name="text" style="--tx:{{ w.o.color }};--sz:{{ w.o.size }}px;text-align:{{ w.o.align }}"{% if w.o.rtl %} dir="rtl"{% endif %}>
+  {% if w.o.title %}<div class="w-title">{{ w.o.title }}</div>{% endif %}
+  <div class="w-body">{{ w.o.body|linebreaksbr }}</div>
+</div>

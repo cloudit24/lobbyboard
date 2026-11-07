@@ -8,7 +8,9 @@
 </head>
 <body>
 <!-- Living background: aurora colours follow the time of day (dawn, day, dusk, night). -->
-<div class="bg" aria-hidden="true">
+<div class="bg{% if screen.background %} has-media{% endif %}" aria-hidden="true">
+  {% with b=screen.background %}{% if b %}{% if b.kind == "video" %}<video class="bg-media" src="{{ b.file.url }}" muted loop autoplay playsinline preload="auto"></video>{% else %}<img class="bg-media" src="{{ b.file.url }}" alt="">{% endif %}
+  <div class="bg-dim" style="opacity:calc({{ screen.background_dim }} / 100)"></div>{% endif %}{% endwith %}
   <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
   <canvas id="particles"></canvas>
   <div class="grid-floor"></div>
@@ -41,7 +43,7 @@
   <!-- ═══ MAIN ═══ -->
   <main class="main grid-layout">
     {% for w in widgets %}
-    <div class="cell cell-{{ w.t }}" style="grid-column:{{ w.x|add:1 }} / span {{ w.w }};grid-row:{{ w.y|add:1 }} / span {{ w.h }}">
+    <div class="cell cell-{{ w.t }} look-{{ w.o.look }}" style="grid-column:{{ w.x|add:1 }} / span {{ w.w }};grid-row:{{ w.y|add:1 }} / span {{ w.h }};{% if w.o.accent %}--acc:{{ w.o.accent }};{% endif %}--fill:{{ w.o.fill }}">
       {% include w.template %}
     </div>
     {% endfor %}
@@ -86,5 +88,6 @@
 </script>
 <script src="{% static 'display/icons.js' %}"></script>
 <script src="{% static 'display/screen.js' %}"></script>
+<script src="{% static 'display/widgets.js' %}"></script>
 </body>
 </html>

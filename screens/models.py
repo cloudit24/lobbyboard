@@ -23,6 +23,12 @@ class Screen(models.Model):
                                     help_text="Who may control this TV. Nobody ticked = every agent may.")
     is_active = models.BooleanField("In use", default=True)
     notes = models.CharField(max_length=200, blank=True)
+    background = models.ForeignKey(
+        "library.MediaItem", null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+        limit_choices_to={"status": "approved", "kind__in": ["image", "video"]},
+        help_text="A photo or video behind everything. Empty = the animated colour background.")
+    background_dim = models.PositiveSmallIntegerField(
+        "Darken the background (%)", default=40, help_text="0 = as it is, 90 = almost black. Keeps text readable.")
     layout = models.JSONField(default=list, blank=True, editable=False,
                               help_text="Where each widget sits. Set it with the layout designer; empty = the standard layout.")
     last_seen = models.DateTimeField(null=True, blank=True, editable=False)

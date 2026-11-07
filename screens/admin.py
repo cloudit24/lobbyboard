@@ -19,7 +19,7 @@ class ScreenAdmin(SimpleHistoryAdmin):
     prepopulated_fields = {"slug": ("name",)}
     filter_horizontal = ("agents",)
     readonly_fields = ("tv_address", "status", "now_playing", "last_ip")
-    fields = ("name", "slug", "tv_address", "layout_link", "is_active", "agents", "notes", "status", "now_playing",
+    fields = ("name", "slug", "tv_address", "layout_link", "background", "background_dim", "is_active", "agents", "notes", "status", "now_playing",
               "last_ip")
     readonly_fields = readonly_fields + ("layout_link",)
 
@@ -35,12 +35,16 @@ class ScreenAdmin(SimpleHistoryAdmin):
                      name="screens_screen_layout")] + super().get_urls()
 
     def layout_view(self, request, pk):
-        """Drag-and-drop designer: place, move and resize the widgets on one TV."""
+        """Drag-and-drop designer: place, move, resize and set up the widgets on one TV, and its background."""
+        from library.models import MediaItem, Playlist
+
         scr = get_object_or_404(Screen, pk=pk)
         if not self.has_change_permission(request, scr):
             return redirect("admin:index")
+        media = MediaItem.objects.filter(status="approved")
         if request.method == "POST":
             action = request.POST.get("action")
+            fields = ["layout"]
             if action == "reset":
                 scr.layout = []
                 msg = "Back to the standard layout."
@@ -54,17 +58,31 @@ class ScreenAdmin(SimpleHistoryAdmin):
                 except ValueError:
                     messages.error(request, "The layout could not be read. Nothing was saved.")
                     return redirect(request.path)
+                bg = request.POST.get("background") or ""
+                scr.background = media.filter(pk=bg, kind__in=["image", "video"]).first() if bg.isdigit() else None
+                try:
+                    scr.background_dim = max(0, min(90, int(request.POST.get("background_dim") or 0)))
+                except ValueError:
+                    pass
+                fields += ["background", "background_dim"]
                 msg = "Layout saved. The TV reloads with it in a few seconds."
-            scr.save(update_fields=["layout"])
+            scr.save(update_fields=fields)
+            if action == "save" and request.POST.get("all_tvs"):
+                Screen.objects.exclude(pk=scr.pk).update(
+                    layout=scr.layout, background=scr.background, background_dim=scr.background_dim)
+                msg = "Saved, and every TV now uses this layout and background."
             bump_content_version()   # the TV reloads itself on its next check
             messages.success(request, msg)
             return redirect(request.path)
-        current = widgets.clean(scr.layout) if scr.layout else widgets.DEFAULT_LAYOUT
+        current = widgets.clean(scr.layout or widgets.DEFAULT_LAYOUT)
+        pick = lambda qs: [{"id": m.pk, "title": str(m)} for m in qs]
         return render(request, "admin/screens/layout.html", {
             **self.admin_site.each_context(request), "title": f"Design: {scr.name}", "screen": scr,
             "opts": self.model._meta, "original": scr,
-            "layout": current, "cols": widgets.COLS, "rows": widgets.ROWS,
-            "catalog": {k: {"label": v[0], "minW": v[1], "minH": v[2]} for k, v in widgets.WIDGETS.items()},
+            "layout": current, "cols": widgets.COLS, "rows": widgets.ROWS, "catalog": widgets.catalog(),
+            "choices": {"image": pick(media.filter(kind="image")), "video": pick(media.filter(kind="video")),
+                        "playlist": pick(Playlist.objects.filter(kind="image", is_active=True))},
+            "backgrounds": media.filter(kind__in=["image", "video"]),
             "others": Screen.objects.exclude(pk=scr.pk),
         })
 

@@ -970,3 +970,40 @@ body[data-occasion=national] .occ-greet b { background-image: linear-gradient(10
 .cell { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .cell > .card { flex: 1 1 auto; min-height: 0; height: auto !important; aspect-ratio: auto; }
 .cell > .card.hidden { display: none; }
+
+/* ===== Designer widgets: box looks, and the extra widget types ===== */
+.cell.look-clear > .card { background: none; border-color: transparent; box-shadow: none; backdrop-filter: none; }
+.cell.look-solid > .card { background: var(--fill); backdrop-filter: none; }
+.w-card { display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+.w-empty { margin: auto; color: var(--text-2); font-size: 16px; text-align: center; }
+.w-title { font-size: calc(var(--sz, 28px) * .6); font-weight: 700; color: var(--acc); margin-bottom: 8px; }
+.w-text { color: var(--tx); }
+.w-text .w-body { font-size: var(--sz); line-height: 1.3; white-space: normal; }
+.w-media-box { padding: 0; position: relative; }
+.w-media-box img, .w-media-box video { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; }
+.w-slides img { opacity: 0; transition: opacity 1.2s ease; } .w-slides img.on { opacity: 1; }
+.w-digital { align-items: center; text-align: center; }
+.w-digital .w-time { font-size: 64px; font-weight: 300; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; }
+.w-digital .w-date { font-size: 18px; color: var(--acc); margin-top: 8px; }
+.w-countdown { align-items: center; text-align: center; }
+.w-countdown .w-count { font-size: 52px; font-weight: 300; color: #fff; font-variant-numeric: tabular-nums; }
+.w-qr { align-items: center; }
+.w-qr-code { flex: 1; min-height: 0; aspect-ratio: 1; background: #fff; padding: 10px; border-radius: 12px; }
+.w-qr-code svg { width: 100%; height: 100%; display: block; }
+.w-qr-label { margin-top: 8px; color: var(--text-2); font-size: 16px; text-align: center; }
+.w-ticker { padding: 0 20px; }
+.w-ticker-track { display: inline-flex; gap: 60px; white-space: nowrap; font-size: 26px; color: #fff;
+  animation: w-marquee linear infinite; will-change: transform; }
+.w-ticker-track span::before { content: "•"; color: var(--acc); margin-right: 18px; }
+@keyframes w-marquee { to { transform: translateX(-50%); } }
+.w-weather { align-items: center; text-align: center; }
+.w-wx-temp { font-size: 60px; font-weight: 300; color: #fff; line-height: 1; }
+.w-wx-text { font-size: 18px; color: var(--acc); margin-top: 6px; }
+.w-web { padding: 0; }
+.w-web iframe { border: 0; width: calc(10000% / var(--z)); height: calc(10000% / var(--z));
+  transform: scale(calc(var(--z) / 100)); transform-origin: 0 0; background: #fff; }
+
+/* ===== Background photo or video per TV ===== */
+.bg-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.bg-dim { position: absolute; inset: 0; background: #000; }
+.bg.has-media .blob, .bg.has-media .grid-floor { display: none; }

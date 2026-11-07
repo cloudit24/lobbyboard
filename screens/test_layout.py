@@ -16,7 +16,19 @@ class LayoutDesignerTests(TestCase):
 
     def test_clean_drops_unknown_duplicate_and_out_of_grid(self):
         out = widgets.clean([{"t": "clock", "x": 30, "y": -2, "w": 99, "h": 1}, {"t": "clock"}, {"t": "evil"}, "x"])
-        self.assertEqual(out, [{"t": "clock", "x": 0, "y": 0, "w": 24, "h": 2}])
+        self.assertEqual([{k: v for k, v in i.items() if k != "o"} for i in out],
+                         [{"t": "clock", "x": 0, "y": 0, "w": 24, "h": 2}])
+        self.assertEqual(out[0]["o"]["look"], "card")
+
+    def test_settings_are_checked_and_multi_widgets_allowed(self):
+        out = widgets.clean([
+            {"t": "text", "x": 0, "y": 0, "w": 4, "h": 2, "o": {"size": 9999, "align": "evil", "body": "Hi"}},
+            {"t": "text", "x": 4, "y": 0, "w": 4, "h": 2},
+            {"t": "web", "x": 8, "y": 0, "w": 4, "h": 2, "o": {"url": "javascript:alert(1)"}},
+        ])
+        self.assertEqual(len(out), 3)
+        self.assertEqual((out[0]["o"]["size"], out[0]["o"]["align"], out[0]["o"]["body"]), (160, "center", "Hi"))
+        self.assertEqual(out[2]["o"]["url"], "")
 
     def test_empty_layout_uses_default(self):
         self.assertEqual([w["t"] for w in widgets.for_screen(self.scr)], [w["t"] for w in widgets.DEFAULT_LAYOUT])
@@ -28,14 +40,19 @@ class LayoutDesignerTests(TestCase):
         self.client.force_login(self.admin)
         r = self.client.get(self.url)
         self.assertContains(r, "ld-canvas")
-        layout = [{"t": "media", "x": 0, "y": 0, "w": 24, "h": 9}, {"t": "clock", "x": 0, "y": 9, "w": 6, "h": 3}]
-        self.client.post(self.url, {"action": "save", "layout": json.dumps(layout)})
+        layout = [{"t": "media", "x": 0, "y": 0, "w": 24, "h": 9}, {"t": "clock", "x": 0, "y": 9, "w": 6, "h": 3},
+                  {"t": "text", "x": 6, "y": 9, "w": 6, "h": 3, "o": {"body": "Open 9 to 5"}}]
+        other = Screen.objects.create(name="Hall", slug="hall")
+        self.client.post(self.url, {"action": "save", "layout": json.dumps(layout), "background_dim": "60", "all_tvs": "on"})
         self.scr.refresh_from_db()
-        self.assertEqual(self.scr.layout, layout)
+        other.refresh_from_db()
+        self.assertEqual([i["t"] for i in self.scr.layout], ["media", "clock", "text"])
+        self.assertEqual((self.scr.background_dim, other.layout), (60, self.scr.layout))
         html = self.client.get(reverse("screen", args=["lobby"])).content.decode()
         self.assertIn("cell-media", html)
         self.assertIn("grid-column:1 / span 24", html)
         self.assertNotIn("cell-prayer", html)
+        self.assertIn("Open 9 to 5", html)
 
     def test_reset_and_copy(self):
         self.client.force_login(self.admin)

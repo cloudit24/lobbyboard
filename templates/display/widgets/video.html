@@ -1,0 +1,3 @@
+<div class="card w-card w-media-box" data-name="video">
+  {% if w.data.url %}<video src="{{ w.data.url }}" muted loop autoplay playsinline preload="auto" style="object-fit:{{ w.o.fit }}"></video>{% else %}<div class="w-empty">Pick a video in the designer</div>{% endif %}
+</div>

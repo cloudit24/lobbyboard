@@ -1,0 +1,3 @@
+<div class="card w-card w-media-box w-slides" data-name="slides" data-seconds="{{ w.o.seconds }}">
+  {% for u in w.data.urls %}<img src="{{ u }}" alt="" style="object-fit:{{ w.o.fit }}"{% if forloop.first %} class="on"{% endif %}>{% empty %}<div class="w-empty">No approved photos yet</div>{% endfor %}
+</div>
